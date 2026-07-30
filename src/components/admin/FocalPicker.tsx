@@ -156,7 +156,21 @@ export function FocalPicker({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onKeyDown={onKeyDown}
-        className={`focus-ring relative block aspect-4/3 w-full touch-none select-none overflow-hidden border border-field bg-black ${
+        /*
+          The frame takes the PHOTO's shape, not the slot's.
+
+          It used to be a fixed 4:3 box with the photo letterboxed inside. Two
+          things went wrong with that. Visually, a vertical phone photo (which
+          is nearly all of them here) shrank to a narrow strip stranded in a
+          wide black box. Worse, the crop rectangle below is positioned as a
+          percentage of THIS element, so whenever the photo did not fill it the
+          highlighted area no longer sat over the part it claimed to represent.
+
+          Matching the frame to the image makes the two coincide exactly, so
+          the overlay is honest and the photo is shown as large as it can be.
+        */
+        style={{ aspectRatio: natural ? `${natural.w} / ${natural.h}` : "4 / 3" }}
+        className={`focus-ring relative mx-auto block w-full touch-none select-none overflow-hidden border border-field bg-black ${
           dragging ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
