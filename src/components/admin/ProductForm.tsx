@@ -23,6 +23,8 @@ export type ProductFormValues = {
   isUniversal: boolean;
   archived: boolean;
   images: string[];
+  imageFit: "COVER" | "CONTAIN";
+  imageZoom: number;
 };
 
 function SubmitButton({ isNew }: { isNew: boolean }) {
@@ -55,6 +57,8 @@ export function ProductForm({
   );
   const [images, setImages] = useState<string[]>(initial.images);
   const [categoryId, setCategoryId] = useState(initial.categoryId);
+  const [imageFit, setImageFit] = useState<"COVER" | "CONTAIN">(initial.imageFit);
+  const [imageZoom, setImageZoom] = useState(initial.imageZoom);
   const isNew = !initial.id;
 
   // Category decides which shop the product appears in. Merch has no fitment,
@@ -236,6 +240,69 @@ export function ProductForm({
           <p className="text-sm text-muted">{images.length} photo(s)</p>
         ) : (
           <ImageUploader value={images} onChange={setImages} folder="products" />
+        )}
+
+        {/*
+          Framing, per product rather than per photo.
+
+          "Whole photo" is the default and the right one for a parts catalog:
+          these are shot on a bench at whatever angle was convenient, and a
+          card that crops half the turbo off is worse than one with a little
+          space around it. It also makes the photo's shape irrelevant, which
+          matters when one product has a vertical shot and another a
+          horizontal one.
+        */}
+        {!readOnly && images.length > 0 && (
+          <div className="mt-5 space-y-3 border-t border-line pt-4">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-sm font-semibold">Photo framing</span>
+              {(
+                [
+                  ["CONTAIN", "Show whole photo"],
+                  ["COVER", "Fill the box"],
+                ] as const
+              ).map(([val, text]) => (
+                <label key={val} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="imageFit"
+                    value={val}
+                    checked={imageFit === val}
+                    onChange={() => setImageFit(val)}
+                    className="peer sr-only"
+                  />
+                  <span className="focus-ring block rounded border border-line px-2.5 py-1 text-[0.7rem] font-semibold text-muted transition-colors peer-checked:border-accent peer-checked:bg-accent peer-checked:text-accent-fg hover:border-line-hi">
+                    {text}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {imageFit === "COVER" && (
+              <label className="block max-w-sm">
+                <span className="mb-1 flex items-center justify-between text-xs text-muted">
+                  <span>Zoom</span>
+                  <span className="font-mono">{imageZoom}%</span>
+                </span>
+                <input
+                  type="range"
+                  name="imageZoom"
+                  min={100}
+                  max={250}
+                  step={5}
+                  value={imageZoom}
+                  onChange={(e) => setImageZoom(Number(e.target.value))}
+                  className="focus-ring w-full accent-[var(--color-accent)]"
+                />
+              </label>
+            )}
+
+            {/* Kept in the form even when the slider is hidden, so switching to
+                "Whole photo" does not silently discard the zoom on save. */}
+            {imageFit !== "COVER" && (
+              <input type="hidden" name="imageZoom" value={imageZoom} />
+            )}
+          </div>
         )}
       </section>
 

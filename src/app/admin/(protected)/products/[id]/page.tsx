@@ -111,6 +111,8 @@ export default async function EditProductPage({
             isUniversal: product.isUniversal,
             archived: product.archived,
             images: product.images,
+            imageFit: product.imageFit,
+            imageZoom: product.imageZoom,
           }}
         />
 

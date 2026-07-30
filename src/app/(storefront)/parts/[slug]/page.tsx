@@ -95,6 +95,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             src={product.images[0] ?? null}
             alt={`${product.brand.name} ${product.name}`}
             priority
+            fit={product.imageFit === "COVER" ? "cover" : "contain"}
+            zoom={product.imageZoom}
             className="aspect-4/3 max-h-[24rem] w-full rounded-card border border-line lg:aspect-square lg:max-h-none"
           />
 
@@ -106,6 +108,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   department={department}
                   src={img}
                   alt={product.name}
+                  fit={product.imageFit === "COVER" ? "cover" : "contain"}
+                  zoom={product.imageZoom}
                   className="aspect-square w-full rounded border border-line"
                 />
               ))}

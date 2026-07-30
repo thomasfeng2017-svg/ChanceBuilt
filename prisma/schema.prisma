@@ -270,6 +270,22 @@ model Product {
   stock       Int     @default(0)
   images      String[]
 
+  /**
+   * How product photos sit in their boxes.
+   *
+   * CONTAIN by default, unlike site photography, because these are parts shot
+   * on a bench and a catalog that crops half the turbo off is worse than one
+   * with a little space around it. It also makes the photo's shape irrelevant,
+   * which matters when the same product might have a vertical phone shot and a
+   * horizontal one.
+   *
+   * Set per product rather than per photo: a product's shots are almost always
+   * taken the same way, and a control per image is more knobs than value.
+   */
+  imageFit  ImageFit @default(CONTAIN)
+  /// Zoom percentage applied to product photos. 100 is no zoom.
+  imageZoom Int      @default(100)
+
   // True for parts that fit any vehicle (oil, tools, cleaners, floor mats).
   // Universal parts bypass fitment matching entirely.
   isUniversal Boolean @default(false)

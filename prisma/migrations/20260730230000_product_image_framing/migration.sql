@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "imageFit" "ImageFit" NOT NULL DEFAULT 'CONTAIN',
+ADD COLUMN     "imageZoom" INTEGER NOT NULL DEFAULT 100;
+

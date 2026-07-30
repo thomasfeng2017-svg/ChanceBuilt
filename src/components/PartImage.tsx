@@ -108,6 +108,10 @@ export function PartImage({
   alt,
   className = "",
   priority = false,
+  /** "contain" shows the whole part; "cover" fills the box and crops. */
+  fit = "contain",
+  /** Zoom percentage. 100 is no zoom. */
+  zoom = 100,
 }: {
   /** Top-level category name; picks the placeholder glyph. */
   department: string;
@@ -116,8 +120,11 @@ export function PartImage({
   alt?: string;
   className?: string;
   priority?: boolean;
+  fit?: "cover" | "contain";
+  zoom?: number;
 }) {
   if (src) {
+    const scale = Math.min(3, Math.max(1, zoom / 100));
     return (
       <div className={`relative overflow-hidden bg-surface-2 ${className}`}>
         <Image
@@ -126,7 +133,11 @@ export function PartImage({
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           priority={priority}
-          className="photo-bw object-cover"
+          style={{
+            objectFit: fit,
+            ...(scale !== 1 ? { transform: `scale(${scale})` } : {}),
+          }}
+          className="photo-bw"
         />
       </div>
     );

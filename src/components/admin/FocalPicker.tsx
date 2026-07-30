@@ -226,7 +226,13 @@ export function FocalPicker({
         {!fullyVisible && (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute overflow-hidden border-2 border-accent"
+            /*
+              The outline is an inset shadow rather than a border. A border
+              shrinks the padding box, and the bright copy inside is positioned
+              in percentages of that box, so two pixels of border threw the
+              alignment off by two pixels at every edge.
+            */
+            className="pointer-events-none absolute overflow-hidden shadow-[inset_0_0_0_2px_var(--color-accent)]"
             style={{
               left: `${windowLeft * 100}%`,
               top: `${windowTop * 100}%`,
@@ -240,14 +246,24 @@ export function FocalPicker({
                 src={previewSrc}
                 alt=""
                 draggable={false}
-                /* Scaled and offset so this copy lines up exactly with the
-                   dimmed one underneath, making the window look like a hole
-                   punched through it rather than a second picture. */
+                /*
+                  Scaled and offset so this copy lines up exactly with the
+                  dimmed one underneath, making the window look like a hole
+                  punched through it rather than a second picture.
+
+                  Positioned with top/left rather than margins. A percentage
+                  MARGIN resolves against the container's WIDTH even when it is
+                  margin-top, so the vertical offset was being computed from the
+                  wrong dimension and the bright copy sat hundreds of pixels off.
+                  For an absolutely positioned element, `top` correctly resolves
+                  against the container's height.
+                */
                 style={{
+                  position: "absolute",
                   width: `${100 / windowW}%`,
                   height: `${100 / windowH}%`,
-                  marginLeft: `${(-windowLeft * 100) / windowW}%`,
-                  marginTop: `${(-windowTop * 100) / windowH}%`,
+                  left: `${(-windowLeft * 100) / windowW}%`,
+                  top: `${(-windowTop * 100) / windowH}%`,
                 }}
                 className="max-w-none object-contain"
               />

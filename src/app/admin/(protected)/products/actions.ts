@@ -42,6 +42,11 @@ export async function saveProductAction(
   const isUniversal = formData.get("isUniversal") === "on";
   const archived = formData.get("archived") === "on";
 
+  // Photo framing. Clamped, since zoom is applied as a CSS transform and a
+  // wild value would blow one pixel up across the whole card.
+  const imageFit = formData.get("imageFit") === "COVER" ? ("COVER" as const) : ("CONTAIN" as const);
+  const imageZoom = Math.max(100, Math.min(300, Number(formData.get("imageZoom")) || 100));
+
   const priceCents = toCents(String(formData.get("price") ?? ""));
   const compareRaw = String(formData.get("compareAt") ?? "").trim();
   const compareAtCents = compareRaw ? toCents(compareRaw) : null;
@@ -88,6 +93,8 @@ export async function saveProductAction(
     images,
     isUniversal,
     archived,
+    imageFit,
+    imageZoom,
     brandId,
     categoryId,
   };
