@@ -1,0 +1,371 @@
+@import "tailwindcss";
+
+/*
+  ChanceBuilt Performance - design tokens.
+
+  Dark canvas, BMW M motorsport colour. The tricolour is the shop's heritage
+  cue: any BMW owner reads it instantly, and it costs nothing to render.
+
+  THE ONE RULE THAT MATTERS HERE:
+
+    The tricolour only ever appears as all three bars together, read as a
+    single mark. Red is NEVER used alone.
+
+  Red alone means one thing on this site: this part does not fit your car. That
+  signal is the whole point of a year/make/model store, and it stops working
+  the moment a red button or a red heading appears somewhere else. Green means
+  fits, red means does not, and nothing decorative is allowed to borrow either.
+
+  Tonal range is deliberate too. An all-dark page has no emphasis because it
+  has nothing to push against, so a couple of sections invert to paper.
+*/
+@theme {
+  --color-ink: #050505;
+  --color-surface: #0d0d0d;
+  --color-surface-2: #161616;
+  --color-line: #262626;
+  --color-line-hi: #3a3a3a;
+
+  /*
+    Light surfaces. Used for whole inverted sections, not for cards, so the
+    page reads as alternating bands rather than scattered light patches.
+  */
+  --color-paper: #ededef;
+  --color-paper-2: #fbfbfc;
+  --color-paper-text: #0a0a0b;
+  --color-paper-muted: #55555c; /* 6.33:1 on --color-paper */
+  --color-paper-line: #d2d2d6;
+
+  /*
+    BMW M tricolour. Decorative marks only - rules, edges, underlines.
+    See the rule above about red.
+  */
+  --color-m-blue: #0066b1;
+  --color-m-violet: #4b2e83;
+  --color-m-red: #e30613;
+
+  /*
+    Border for interactive controls: inputs, selects, textareas, outline
+    buttons. Brighter than --color-line on purpose.
+
+    WCAG 1.4.11 requires 3:1 for anything that identifies a control boundary.
+    --color-line manages only 1.20:1 against the input fill, which is fine for
+    a decorative card edge but means a low-vision customer cannot see where the
+    Year/Make/Model dropdowns begin and end. Those are the most important
+    controls on the site, so they get a border that clears the bar:
+    3.17:1 on --color-surface-2, 3.40:1 on --color-surface.
+  */
+  --color-field: #66666b;
+  --color-text: #f4f4f5;
+  --color-muted: #8b8b90;
+
+  /*
+    Primary action colour: M blue.
+
+    Held at the official #0066b1 rather than a brighter, more "designed" blue
+    because white text on it clears 5.94:1, and the hover state 4.72:1. A
+    punchier blue looked better and failed AA on every button label.
+  */
+  --color-accent: #0066b1;
+  --color-accent-hi: #0a76c9;
+  --color-accent-fg: #ffffff;
+
+  /*
+    Blue as TEXT rather than as a fill.
+
+    #0066b1 works as a button background because the label sits on top of it,
+    but as type on the near-black canvas it only reaches 3.43:1 and fails AA.
+    This is the lightened version: 7.33:1 on ink. .section-paper flips it back
+    to a deep blue, so the same utility class is legible on both.
+  */
+  --color-accent-text: #4da3e8;
+
+  /* The white-block treatment, now a secondary action rather than the default. */
+  --color-chalk: #ffffff;
+  --color-chalk-hi: #d9d9dd;
+  --color-chalk-fg: #050505;
+
+  /* Fitment signalling. Green fits, red does not. Nothing else may use these. */
+  --color-good: #34d17d;
+  --color-warn: #f5b642;
+  --color-bad: #ff5257;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), var(--font-inter), sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /*
+    Near-square corners. Editorial and industrial layouts read sharper; a 6px
+    radius on a monochrome parts catalog makes it look like a generic SaaS
+    dashboard. 2px keeps the edge from feeling accidental without softening it.
+  */
+  --radius-card: 0.125rem;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--color-ink);
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  Film grain.
+
+  The shop's identity is black-and-white photography, and flat #050505 has none
+  of that texture. A single fixed grain layer at 3.5% gives the whole page the
+  tooth of film stock. Fixed rather than per-section so it never scrolls or
+  tiles visibly, and pointer-events:none so it can't intercept a click.
+*/
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Display type: condensed, heavy, tight. Barlow Condensed carries more
+   motorsport character than a neutral grotesque at large sizes. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+/*
+  Editorial section header: a hairline rule that runs the full width with the
+  label sitting on it. Cheap to render, and it gives long pages a rhythm that
+  stacked headings alone don't.
+*/
+.rule-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rule-heading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-line);
+}
+
+/*
+  The M tricolour as a single mark.
+
+  One gradient with hard stops rather than three elements, so it can be dropped
+  on any box via ::before without touching the markup.
+*/
+.m-rule::before {
+  content: "";
+  display: block;
+  width: 2.75rem;
+  height: 3px;
+  margin-bottom: 0.85rem;
+  background: linear-gradient(
+    to right,
+    var(--color-m-blue) 0 33.34%,
+    var(--color-m-violet) 33.34% 66.67%,
+    var(--color-m-red) 66.67% 100%
+  );
+}
+
+/* Inline variant: sits before a label on the same line. */
+.rule-heading::before {
+  content: "";
+  width: 1.5rem;
+  height: 3px;
+  flex: none;
+  background: linear-gradient(
+    to right,
+    var(--color-m-blue) 0 33.34%,
+    var(--color-m-violet) 33.34% 66.67%,
+    var(--color-m-red) 66.67% 100%
+  );
+}
+
+/*
+  Tricolour left edge for tiles. Collapsed to a hairline at rest and opened on
+  hover, so a grid of eight tiles isn't eight competing stripes.
+*/
+.m-edge {
+  position: relative;
+}
+
+.m-edge::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s cubic-bezier(0.2, 0.6, 0.3, 1);
+  background: linear-gradient(
+    to bottom,
+    var(--color-m-blue) 0 33.34%,
+    var(--color-m-violet) 33.34% 66.67%,
+    var(--color-m-red) 66.67% 100%
+  );
+}
+
+.m-edge:hover::after,
+.group:hover .m-edge::after,
+.m-edge:focus-visible::after {
+  transform: scaleY(1);
+}
+
+/*
+  Inverted section.
+
+  Rather than restyling every child, this re-points the theme variables inside
+  its own scope. Tailwind v4 utilities compile to var() references, so every
+  text-muted, border-line and bg-surface inside a paper section re-tones
+  automatically and nothing downstream needs a light-mode variant.
+*/
+.section-paper {
+  background: var(--color-paper);
+  --color-text: var(--color-paper-text);
+  --color-muted: var(--color-paper-muted);
+  --color-line: var(--color-paper-line);
+  --color-line-hi: #b4b4bc;
+  --color-field: #6d6d76;
+  --color-surface: var(--color-paper-2);
+  --color-surface-2: #e2e2e7;
+  --color-ink: var(--color-paper-text);
+  /* The lightened blue is for dark backgrounds only; on paper it drops to
+     2.33:1. Deep blue here reads 6.12:1. */
+  --color-accent-text: #0059a0;
+  color: var(--color-paper-text);
+}
+
+/* Section index numerals, e.g. "01". Monospaced so they align down the page. */
+.section-index {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--color-muted);
+}
+
+/* Eyebrow / label type. */
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Diagonal hazard texture used behind the hero — a nod to shop floor tape,
+   kept at very low opacity so photography stays the hero. */
+.shop-grid {
+  background-image:
+    linear-gradient(to bottom, rgba(5, 5, 5, 0.55), rgba(5, 5, 5, 0.95)),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.028) 0 2px,
+      transparent 2px 14px
+    );
+}
+
+/* Native select styling — the YMM dropdowns are the most-used control here. */
+.select-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238b8b90' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1.15rem;
+  padding-right: 2.3rem;
+}
+
+.select-field:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Keyboard-only escape hatch past the header. There are 14 tabbable elements
+   between the top of the page and the first product, which is a long way to
+   tab on every single navigation. */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -100%;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  font-weight: 700;
+  border-radius: 0.25rem;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/*
+  Photography treatment.
+
+  This used to be grayscale(1), which threw away the only real colour the site
+  had: the cars. A frozen grey G82, bronze wheels and a red M4 all arrived as
+  the same grey as the background they sat on. Now it is a light grade that
+  lifts contrast and holds the photos together as a set, with saturation coming
+  up on hover.
+*/
+.photo-bw {
+  filter: contrast(1.08) saturate(0.88);
+  transition: filter 0.4s ease;
+}
+
+.group:hover .photo-bw,
+.photo-bw:hover {
+  filter: contrast(1.04) saturate(1.06);
+}
+
+/*
+  Grid reveal.
+
+  CSS rather than GSAP: the recommended "subtle" tier is a 300ms fade and 8px
+  rise, which does not justify a 50KB animation dependency. Delay is set inline
+  per card and capped, so a 40-product page doesn't take four seconds to appear.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    animation: reveal 320ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* A full-bleed moving background is precisely what this setting is for.
+     Hiding the video reveals the poster frame underneath it. */
+  .hero-video {
+    display: none;
+  }
+}

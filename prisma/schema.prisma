@@ -1,0 +1,491 @@
+// Autoshop catalog + YMM (Year / Make / Model) fitment schema.
+//
+// Fitment model notes:
+//   A part's compatibility is stored as *year-range rows* (Fitment), not as one
+//   row per individual vehicle year. This is how supplier/distributor feeds ship
+//   data ("2015-2020 Honda Civic"), it keeps the table small, and it still
+//   answers the only question the storefront asks:
+//
+//     "does this part fit a <year> <make> <model>?"
+//
+//   A part can have many Fitment rows (one per generation/model it covers).
+//   Parts that fit everything (fluids, tools, cleaners) set Product.isUniversal
+//   instead of carrying a Fitment row per vehicle in existence.
+//
+//   submodel/engine are optional refinements. They are ignored by the basic YMM
+//   filter and surfaced on the product page as "notes" so a customer can catch
+//   an edge case ("Si only", "2.0L Turbo only"). When you later move to ACES/
+//   VCdb these become the qualifier columns and Fitment gains a baseVehicleId.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: the connection URL lives in prisma.config.ts, not here.
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------- vehicles --
+
+model Make {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  models   Model[]
+  fitments Fitment[]
+
+  @@index([name])
+}
+
+model Model {
+  id     String @id @default(cuid())
+  makeId String
+  make   Make   @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  name   String
+  slug   String
+
+  /// BMW-style chassis code (F80, G80, F30...). BMW owners shop by chassis far
+  /// more than by model name, so it is surfaced everywhere the model is.
+  chassis String?
+
+  /// Factory engine codes for this chassis, e.g. ["S55"] or ["B58","B48"].
+  /// Used for the engine-platform shortcuts (S55 / B58 / S58) on the storefront.
+  engineCodes String[] @default([])
+
+  // Production run. Drives the Year dropdown without needing a row per year.
+  yearStart Int
+  yearEnd   Int
+
+  fitments     Fitment[]
+  appointments Appointment[]
+
+  @@unique([makeId, slug])
+  @@index([makeId, name])
+}
+
+// ------------------------------------------------------------------ images --
+
+/**
+ * Site photography, addressed by slot.
+ *
+ * Everything except product shots used to live as files in public/, which is
+ * fine on a laptop and useless in production: Vercel's filesystem is read-only
+ * and ephemeral, so the shop could never change its own hero or gallery.
+ *
+ * Slots are strings so new ones cost nothing:
+ *   "hero"                  single image
+ *   "engine:s55"            single image
+ *   "section:about-shop"    single image
+ *   "gallery"               many images, ordered by sortOrder
+ */
+enum MediaKind {
+  IMAGE
+  VIDEO
+}
+
+model SiteImage {
+  id   String    @id @default(cuid())
+  slot String
+  url  String
+  kind MediaKind @default(IMAGE)
+
+  /**
+   * Still frame for a video: shown before playback starts, and to anyone whose
+   * browser or data saver blocks autoplay. Also what the focal picker previews,
+   * since you cannot scrub a video to pick a crop.
+   */
+  posterUrl String?
+  /**
+   * Intrinsic pixel size, when known.
+   *
+   * Needed so the gallery can lay photos out at their true shape instead of
+   * forcing every one into the same tile. Nearly all of this shop's
+   * photography is shot vertically, and a fixed 4:3 grid cropped the car out
+   * of frame. Also lets next/image reserve the right box and avoid layout
+   * shift. Nullable because older rows predate it.
+   */
+  width  Int?
+  height Int?
+
+  /// Empty for purely decorative images, which is correct for backgrounds.
+  alt  String @default("")
+
+  /**
+   * Focal point as percentages of the image, 0-100, rendered as CSS
+   * object-position. This is what makes one upload work in a wide hero and a
+   * square tile: the crop changes with the viewport but the part that matters
+   * stays in frame. Beats re-cropping the file for every aspect ratio.
+   */
+  focalX Int @default(50)
+  focalY Int @default(50)
+
+  /// Shown under gallery images. Ignored elsewhere.
+  caption String?
+
+  sortOrder Int     @default(0)
+  /// Hide without deleting, so a photo can come back for a season.
+  active    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slot, active, sortOrder])
+}
+
+// -------------------------------------------------------------------- auth --
+
+enum UserRole {
+  /// Full access, including managing other users.
+  OWNER
+  /// Day-to-day: catalog, orders, appointments. Cannot manage users.
+  STAFF
+  /// Read-only. Useful for an accountant or an outside parts buyer.
+  VIEWER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  /// bcrypt hash — plaintext passwords are never stored or logged.
+  passwordHash String
+  role         UserRole @default(STAFF)
+  /// Deactivating beats deleting: it keeps the audit trail intact.
+  active       Boolean  @default(true)
+
+  sessions  Session[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+}
+
+/// Server-side sessions. The cookie carries a random token; only its SHA-256
+/// hash is stored, so a leaked database dump can't be used to impersonate
+/// anyone. Revoking access is a row delete.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ----------------------------------------------------------------- catalog --
+
+enum CatalogKind {
+  /// Things that bolt to a car. Sold through fitment.
+  PART
+  /// Shirts, hats, stickers. No vehicle involved.
+  MERCH
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  /**
+   * Which storefront this category belongs to.
+   *
+   * Held on the category rather than the product so the two can never
+   * disagree: a product's side of the shop follows from where it is filed.
+   * Children inherit their parent's kind at seed time.
+   */
+  kind CatalogKind @default(PART)
+
+  parentId String?
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  products Product[]
+
+  @@index([parentId])
+  @@index([kind, parentId])
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  sku         String  @unique
+  partNumber  String?
+  name        String
+  slug        String  @unique
+  description String
+  // Money is stored in integer cents. Never use Float for currency.
+  priceCents  Int
+  // Optional "was" price, for showing a strikethrough.
+  compareAtCents Int?
+  stock       Int     @default(0)
+  images      String[]
+
+  // True for parts that fit any vehicle (oil, tools, cleaners, floor mats).
+  // Universal parts bypass fitment matching entirely.
+  isUniversal Boolean @default(false)
+
+  /// Hidden from the storefront but kept for order history. Prefer this over
+  /// deleting a product that has ever been sold.
+  archived Boolean @default(false)
+
+  brandId    String
+  brand      Brand    @relation(fields: [brandId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  fitments   Fitment[]
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([isUniversal])
+}
+
+/// One compatibility range: "this product fits <make> <model> from
+/// yearStart..yearEnd (inclusive)". Multiple rows per product are expected.
+model Fitment {
+  id        String @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  makeId  String
+  make    Make   @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  modelId String
+  model   Model  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  yearStart Int
+  yearEnd   Int
+
+  // Optional refinements, shown to the customer rather than auto-filtered.
+  submodel String?
+  engine   String?
+  notes    String?
+
+  // The index that makes the storefront query fast: we always look up by
+  // (model, year-range) and then check the product.
+  @@index([modelId, yearStart, yearEnd])
+  @@index([makeId])
+  @@index([productId])
+}
+
+// ------------------------------------------------------------------ orders --
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+}
+
+model Order {
+  id     String      @id @default(cuid())
+  number String      @unique
+  email  String
+  status OrderStatus @default(PENDING)
+
+  subtotalCents Int
+  shippingCents Int
+  taxCents      Int
+  totalCents    Int
+
+  // The vehicle the customer was shopping for, captured at checkout. Hugely
+  // useful for support ("they ordered this for a 2018 Civic").
+  vehicleLabel String?
+
+  /// Stripe Checkout session. Unique so the webhook can be replayed safely.
+  stripeSessionId       String? @unique
+  stripePaymentIntentId String?
+  paidAt                DateTime?
+
+  /// Shipping address captured by Stripe Checkout.
+  shipName    String?
+  shipLine1   String?
+  shipLine2   String?
+  shipCity    String?
+  shipState   String?
+  shipPostal  String?
+  shipCountry String?
+
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+
+  @@index([email])
+}
+
+// ------------------------------------------------------------- shop config --
+
+/**
+ * Business details, editable by the shop.
+ *
+ * These used to live in src/lib/site.ts, which meant changing the opening
+ * hours needed a developer and a deploy. Hours in particular drive the booking
+ * calendar, so stale ones take appointments on days the shop is shut.
+ *
+ * Single row, id pinned to "shop". Reads fall back to the constants in
+ * src/lib/site.ts when the row is absent, so a fresh checkout still renders.
+ */
+model ShopSettings {
+  id String @id @default("shop")
+
+  name        String
+  shortName   String
+  legalName   String
+  tagline     String
+  description String
+
+  phone String
+  email String
+
+  street String
+  city   String
+  state  String
+  zip    String
+
+  instagram String?
+  youtube   String?
+  tiktok    String?
+  yelp      String?
+  google    String?
+
+  /**
+   * Seven entries, Sunday first, each either null (closed) or
+   * { open: "10:00", close: "18:00" }. JSON rather than seven pairs of
+   * columns, or a row per weekday, because it is always read and written as a
+   * complete week.
+   */
+  hours Json
+
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * A date range the shop is shut regardless of opening hours: holidays,
+ * vacation, a track weekend. The booking calendar refuses these days.
+ */
+model ShopClosure {
+  id String @id @default(cuid())
+
+  /// Inclusive, and interpreted in the shop's own timezone.
+  startsOn DateTime @db.Date
+  endsOn   DateTime @db.Date
+
+  /// Shown to customers on the booking page, so keep it presentable.
+  reason String
+
+  createdAt DateTime @default(now())
+
+  @@index([startsOn, endsOn])
+}
+
+// -------------------------------------------------------- services/booking --
+
+enum ServiceCategory {
+  TUNING
+  PERFORMANCE
+  MAINTENANCE
+  FABRICATION
+  DIAGNOSTIC
+}
+
+/// A bookable job. Duration drives how the day is carved into slots.
+model Service {
+  id    String @id @default(cuid())
+  name  String
+  slug  String @unique
+  /// One-line summary for cards.
+  blurb String
+  /// Full copy for the service detail / booking screen.
+  description String
+
+  category ServiceCategory
+
+  /// Indicative price. Null means "quote only" — race builds and custom
+  /// fabrication can't be priced from a dropdown.
+  priceFromCents Int?
+  priceNote      String?
+
+  /// Slot length in minutes. Drop-off jobs use a nominal booking slot; the car
+  /// stays longer, but the calendar only needs the intake appointment.
+  durationMinutes Int
+
+  /// Whether the booking form requires a vehicle. Almost everything does.
+  requiresVehicle Boolean @default(true)
+
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+
+  appointments Appointment[]
+
+  @@index([category, sortOrder])
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+/// A booked slot. Vehicle details are denormalised onto the row so the record
+/// still reads correctly if the catalog changes later.
+model Appointment {
+  id        String @id @default(cuid())
+  reference String @unique
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  startsAt DateTime
+  endsAt   DateTime
+
+  status AppointmentStatus @default(REQUESTED)
+
+  customerName String
+  email        String
+  phone        String
+
+  vehicleYear    Int?
+  vehicleMake    String?
+  vehicleModel   String?
+  vehicleChassis String?
+  /// Soft link back to the catalog model, when the customer picked one.
+  modelId String?
+  model   Model?  @relation(fields: [modelId], references: [id], onDelete: SetNull)
+
+  notes     String?
+  createdAt DateTime @default(now())
+
+  // The index the availability query lives on.
+  @@index([startsAt, status])
+  @@index([email])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  // Denormalised so the order stays accurate if the product later changes.
+  name           String
+  sku            String
+  unitPriceCents Int
+  quantity       Int
+
+  @@index([orderId])
+}

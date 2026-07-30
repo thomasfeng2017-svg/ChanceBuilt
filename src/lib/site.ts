@@ -1,0 +1,160 @@
+/**
+ * Default business details.
+ *
+ * These are no longer the live values. The shop edits its own details under
+ * Settings in the admin, and `src/lib/settings.ts` reads them from the
+ * database, falling back to everything here when no row exists yet. That
+ * fallback is what keeps a fresh checkout and the seed working.
+ *
+ * Read through `getShopSettings()` rather than importing SITE directly, or the
+ * page will show these constants instead of whatever the shop actually set.
+ */
+
+/** One entry per weekday, Sunday first. `null` means closed that day. */
+export type ShopHours = Array<{ open: string; close: string } | null>;
+
+export type SiteDetails = {
+  name: string;
+  shortName: string;
+  legalName: string;
+  tagline: string;
+  description: string;
+  phone: string;
+  phoneHref: string;
+  email: string;
+  address: { street: string; city: string; state: string; zip: string };
+  social: { instagram: string; youtube: string; tiktok: string; yelp?: string; google?: string };
+  hours: ShopHours;
+  platforms: ReadonlyArray<{
+    code: string;
+    codes: string[];
+    slot: string;
+    /** Drives the EngineGlyph schematic: single or twin turbo. */
+    turbos: 1 | 2;
+    blurb: string;
+  }>;
+};
+
+export const SITE: SiteDetails = {
+  name: "ChanceBuilt Performance",
+  shortName: "ChanceBuilt",
+  legalName: "ChanceBuilt Performance LLC",
+  tagline: "BMW Performance Specialists",
+  description:
+    "BMW performance specialists in Riverside, California. Turbo upgrades, ECU unlocks and custom tuning, maintenance and full race car builds for S55, B58, S58 and N54/N55 platforms.",
+
+  phone: "(951) 539-2901",
+  phoneHref: "tel:+19515392901",
+  email: "info@chancebuiltperformance.com",
+
+  address: {
+    street: "12510 Magnolia Ave",
+    city: "Riverside",
+    state: "CA",
+    zip: "92503",
+  },
+
+  social: {
+    instagram: "https://www.instagram.com/chancebuiltllc/",
+    youtube: "https://www.youtube.com/@chancebuiltllc",
+    tiktok: "https://www.tiktok.com/@chancebuiltllc",
+  },
+
+  /**
+   * Opening hours, 0 = Sunday. `null` means closed.
+   * These drive the booking calendar — change them here and availability
+   * follows automatically.
+   */
+  hours: [
+    null, // Sun
+    { open: "10:00", close: "18:00" }, // Mon
+    { open: "10:00", close: "18:00" }, // Tue
+    { open: "10:00", close: "18:00" }, // Wed
+    { open: "10:00", close: "18:00" }, // Thu
+    { open: "10:00", close: "18:00" }, // Fri
+    { open: "11:00", close: "18:00" }, // Sat
+  ] as Array<{ open: string; close: string } | null>,
+
+  /**
+   * Engine platforms the shop leads with.
+   *
+   * `codes` are matched against Model.engineCodes to filter the catalog, so
+   * "N54 / N55" correctly covers both. `slot` is the SiteImage slot holding
+   * that platform's photo, which the shop can change in the admin.
+   */
+  platforms: [
+    {
+      code: "S55",
+      codes: ["S55"],
+      slot: "engine:s55",
+      turbos: 2 as const,
+      blurb: "F80 M3 · F82 M4 · F87 M2 Competition",
+    },
+    {
+      code: "S58",
+      codes: ["S58"],
+      slot: "engine:s58",
+      turbos: 2 as const,
+      blurb: "G80 M3 · G82 M4 · G87 M2 · X3M / X4M",
+    },
+    {
+      code: "B58",
+      codes: ["B58"],
+      slot: "engine:b58",
+      // Single twin-scroll, unlike the M engines.
+      turbos: 1 as const,
+      blurb: "M340i · M240i · M440i · Z4 M40i · A90 Supra",
+    },
+    {
+      code: "N54 / N55",
+      codes: ["N54", "N55"],
+      slot: "engine:n54-n55",
+      turbos: 2 as const,
+      blurb: "335i · 135i · 335is · E9x / F3x",
+    },
+  ],
+};
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+/** Business week order, so the label reads Monday first and Sunday last. */
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+/** "10:00" -> "10:00 AM", "18:00" -> "6:00 PM". */
+function time12h(hhmm: string): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 === 0 ? 12 : h % 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${suffix}`;
+}
+
+/**
+ * Human-readable opening hours, consecutive identical days merged.
+ *
+ * This used to be a hand-written constant sitting next to the `hours` array it
+ * was supposed to describe, which meant the two could disagree and nothing
+ * would catch it. Deriving it means the footer can never advertise hours the
+ * booking calendar won't honour.
+ */
+export function hoursLabel(hours: ShopHours): Array<{ days: string; time: string }> {
+  const out: Array<{ days: string; time: string }> = [];
+
+  for (const weekday of WEEK_ORDER) {
+    const day = hours[weekday];
+    const time = day ? `${time12h(day.open)} - ${time12h(day.close)}` : "Closed";
+    const last = out[out.length - 1];
+
+    if (last && last.time === time) {
+      // Extend the run. "Monday" becomes "Monday - Tuesday", then the end moves.
+      const start = last.days.split(" - ")[0];
+      last.days = `${start} - ${DAY_NAMES[weekday]}`;
+    } else {
+      out.push({ days: DAY_NAMES[weekday], time });
+    }
+  }
+
+  return out;
+}
+
+export const HOURS_LABEL = hoursLabel(SITE.hours);
+
+export const addressLine = `${SITE.address.street}, ${SITE.address.city}, ${SITE.address.state} ${SITE.address.zip}`;
