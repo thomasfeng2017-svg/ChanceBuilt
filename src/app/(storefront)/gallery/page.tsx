@@ -4,6 +4,8 @@ import Link from "next/link";
 import { getSiteImages } from "@/lib/site-images";
 import { GalleryVideo } from "@/components/GalleryVideo";
 import { GALLERY_SLOT } from "@/lib/image-slots";
+import { getCopy } from "@/lib/content";
+import { CopyWithLink } from "@/components/CopyText";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -14,23 +16,20 @@ export const metadata: Metadata = {
 
 export default async function GalleryPage() {
   const images = await getSiteImages(GALLERY_SLOT);
+  const copy = await getCopy();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <header className="max-w-2xl">
-        <p className="m-rule eyebrow text-[0.7rem] text-muted">Our work</p>
-        <h1 className="display mt-2 text-3xl sm:text-5xl">Gallery</h1>
+        <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("gallery.eyebrow")}</p>
+        <h1 className="display mt-2 text-3xl sm:text-5xl">{copy("gallery.heading")}</h1>
         <p className="mt-4 text-sm text-muted sm:text-base">
-          Builds, installs and race cars out of the shop. More on{" "}
-          <a
+          <CopyWithLink
+            text={copy("gallery.intro")}
+            phrase="Instagram"
             href={SITE.social.instagram}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="focus-ring rounded text-text underline underline-offset-2"
-          >
-            Instagram
-          </a>
-          .
+            external
+          />
         </p>
       </header>
 
@@ -116,10 +115,8 @@ export default async function GalleryPage() {
       )}
 
       <div className="mt-14 rounded-card border border-line bg-surface p-6 text-center sm:p-8">
-        <h2 className="display text-xl">Want your car in here?</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted">
-          Book a slot and let&apos;s talk about what you want out of it.
-        </p>
+        <h2 className="display text-xl">{copy("gallery.cta.heading")}</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-muted">{copy("gallery.cta.body")}</p>
         <Link
           href="/book"
           className="focus-ring mt-5 inline-block rounded bg-accent px-8 py-3.5 text-sm font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"

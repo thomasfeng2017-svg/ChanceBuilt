@@ -139,6 +139,110 @@ export const CONTENT_GROUPS: ContentGroup[] = [
     ],
   },
   {
+    title: "About page",
+    blurb: "The three paragraphs that explain what the shop is.",
+    blocks: [
+      { key: "about.eyebrow", label: "Small line above the heading", text: "Who we are" },
+      {
+        key: "about.heading",
+        label: "Heading",
+        hint: "Two short lines work best.",
+        multiline: true,
+        text: "We only work on\nturbo BMWs",
+      },
+      {
+        key: "about.para1",
+        label: "First paragraph",
+        multiline: true,
+        text: "ChanceBuilt Performance is a BMW specialist shop in Riverside, California. Not a general repair shop that happens to take BMWs, but a shop that works on the same handful of engines every single day and knows exactly how they fail, how they respond to boost, and what they need to survive it.",
+      },
+      {
+        key: "about.para2",
+        label: "Second paragraph",
+        multiline: true,
+        text: "That focus is the whole point. When an S55 comes in with a misfire under load, we are not guessing. When someone wants 700 wheel horsepower out of a B58, we can tell them what that actually costs: in parts, in fuelling, and in how long the car lasts afterwards.",
+      },
+      {
+        key: "about.para3",
+        label: "Third paragraph",
+        multiline: true,
+        text: "We do the tuning in-house. We do the fabrication in-house. And we would rather talk you out of a bad idea than take your money for it.",
+      },
+    ],
+  },
+  {
+    title: "Contact page",
+    blurb: "What people read before they call.",
+    blocks: [
+      { key: "contact.eyebrow", label: "Small line above the heading", text: "Get in touch" },
+      { key: "contact.heading", label: "Heading", text: "Contact" },
+      {
+        key: "contact.intro",
+        label: "Opening paragraph",
+        hint: "The words 'book online' become a link automatically, so keep that phrase in.",
+        multiline: true,
+        text: "The fastest way to get on the calendar is to book online. For anything else, call the shop, we answer.",
+      },
+      {
+        key: "contact.cta.heading",
+        label: "Heading on the box at the bottom",
+        text: "Ready to get the car in?",
+      },
+    ],
+  },
+  {
+    title: "Booking page",
+    blurb: "Shown above the calendar.",
+    blocks: [
+      { key: "book.heading", label: "Heading", text: "Book the shop" },
+      {
+        key: "book.intro",
+        label: "Opening paragraph",
+        hint: "The phone number is added automatically at the end.",
+        multiline: true,
+        text: "Pick what you need, choose a time that works, and we'll confirm before you come in. Not sure what you need? Call us on",
+      },
+    ],
+  },
+  {
+    title: "Gallery page",
+    blurb: "The intro, and the box at the bottom.",
+    blocks: [
+      { key: "gallery.eyebrow", label: "Small line above the heading", text: "Our work" },
+      { key: "gallery.heading", label: "Heading", text: "Gallery" },
+      {
+        key: "gallery.intro",
+        label: "Opening paragraph",
+        hint: "The word 'Instagram' becomes a link automatically, so keep it in.",
+        multiline: true,
+        text: "Builds, installs and race cars out of the shop. More on Instagram.",
+      },
+      {
+        key: "gallery.cta.heading",
+        label: "Heading on the box at the bottom",
+        text: "Want your car in here?",
+      },
+      {
+        key: "gallery.cta.body",
+        label: "Line under it",
+        text: "Book a slot and let's talk about what you want out of it.",
+      },
+    ],
+  },
+  {
+    title: "Homepage: bottom block",
+    blurb: "The 'Bring it in' block at the foot of the homepage.",
+    blocks: [
+      { key: "home.cta.heading", label: "Heading", text: "Bring it in" },
+      {
+        key: "home.cta.body",
+        label: "Paragraph",
+        multiline: true,
+        text: "Tell us what the car is and what you want out of it. We'll tell you honestly what it takes, what it costs, and how long it will be with us.",
+      },
+    ],
+  },
+  {
     title: "Parts & merch",
     blurb: "The banner text at the top of the two shop pages.",
     blocks: [

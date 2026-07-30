@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionPhoto } from "@/components/SectionPhoto";
+import { getCopy } from "@/lib/content";
+import { CopyWithLink } from "@/components/CopyText";
 import { SITE, HOURS_LABEL, addressLine } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -8,18 +10,16 @@ export const metadata: Metadata = {
   description: `Contact ChanceBuilt Performance in Riverside, CA. ${SITE.phone}.`,
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const copy = await getCopy();
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <header className="max-w-2xl">
-        <p className="m-rule eyebrow text-[0.7rem] text-muted">Get in touch</p>
-        <h1 className="display mt-2 text-3xl sm:text-5xl">Contact</h1>
+        <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("contact.eyebrow")}</p>
+        <h1 className="display mt-2 text-3xl sm:text-5xl">{copy("contact.heading")}</h1>
         <p className="mt-4 text-sm text-muted sm:text-base">
-          The fastest way to get on the calendar is to{" "}
-          <Link href="/book" className="focus-ring rounded text-text underline underline-offset-2">
-            book online
-          </Link>
-          . For anything else, call the shop, we answer.
+          <CopyWithLink text={copy("contact.intro")} phrase="book online" href="/book" />
         </p>
       </header>
 
@@ -103,7 +103,7 @@ export default function ContactPage() {
       </div>
 
       <div className="mt-12 rounded-card border border-line bg-surface p-6 text-center sm:p-8">
-        <h2 className="display text-xl">Ready to get the car in?</h2>
+        <h2 className="display text-xl">{copy("contact.cta.heading")}</h2>
         <Link
           href="/book"
           className="focus-ring mt-5 inline-block rounded bg-accent px-8 py-3.5 text-sm font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"

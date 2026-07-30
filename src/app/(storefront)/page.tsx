@@ -405,11 +405,8 @@ export default async function HomePage() {
         />
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-2">
           <div>
-            <h2 className="display text-2xl sm:text-3xl">Bring it in</h2>
-            <p className="mt-3 max-w-md text-sm text-muted">
-              Tell us what the car is and what you want out of it. We&apos;ll tell you honestly
-              what it takes, what it costs, and how long it will be with us.
-            </p>
+            <h2 className="display text-2xl sm:text-3xl">{copy("home.cta.heading")}</h2>
+            <p className="mt-3 max-w-md text-sm text-muted">{copy("home.cta.body")}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/book"

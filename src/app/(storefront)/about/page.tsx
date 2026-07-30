@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionPhoto } from "@/components/SectionPhoto";
+import { getCopy } from "@/lib/content";
+import { CopyText } from "@/components/CopyText";
 import { SITE, HOURS_LABEL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -9,15 +11,15 @@ export const metadata: Metadata = {
     "ChanceBuilt Performance is a BMW-focused performance shop in Riverside, California specialising in turbocharged platforms.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const copy = await getCopy();
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <header className="max-w-2xl">
-        <p className="m-rule eyebrow text-[0.7rem] text-muted">Who we are</p>
+        <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("about.eyebrow")}</p>
         <h1 className="display mt-2 text-3xl sm:text-5xl">
-          We only work on
-          <br />
-          turbo BMWs
+          <CopyText>{copy("about.heading")}</CopyText>
         </h1>
       </header>
 
@@ -30,19 +32,9 @@ export default function AboutPage() {
       />
 
       <div className="mt-8 max-w-2xl space-y-5 text-sm leading-relaxed text-muted sm:text-base">
-        <p>
-          ChanceBuilt Performance is a BMW specialist shop in Riverside, California. Not a general
-          repair shop that happens to take BMWs, but a shop that works on the same handful of engines
-          every single day and knows exactly how they fail, how they respond to boost, and what          they need to survive it.
-        </p>
-        <p>
-          That focus is the whole point. When an S55 comes in with a misfire under load, we are not
-          guessing. When someone wants 700 wheel horsepower out of a B58, we can tell them what          that actually costs: in parts, in fuelling, and in how long the car lasts afterwards.
-        </p>
-        <p>
-          We do the tuning in-house. We do the fabrication in-house. And we would rather talk you
-          out of a bad idea than take your money for it.
-        </p>
+        <p>{copy("about.para1")}</p>
+        <p>{copy("about.para2")}</p>
+        <p>{copy("about.para3")}</p>
       </div>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
