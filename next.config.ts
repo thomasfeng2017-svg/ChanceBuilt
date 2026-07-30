@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+/**
+ * Read at build time from the same variable the upload driver uses, so the
+ * allowlist and the destination can never disagree. Vercel injects environment
+ * variables into the build, so this resolves there.
+ */
+const cloudinaryCloud = process.env.CLOUDINARY_CLOUD_NAME;
+
 const nextConfig: NextConfig = {
   /**
    * Hosts allowed to reach the dev server through a tunnel.
@@ -25,6 +32,31 @@ const nextConfig: NextConfig = {
    */
   outputFileTracingIncludes: {
     "/**": ["./public/brand/**"],
+  },
+
+  images: {
+    /**
+     * next/image refuses to optimise a remote host unless it is listed here,
+     * so that a site cannot be used as an open image proxy.
+     *
+     * Everything uploaded through the admin in production lands on Cloudinary,
+     * so without this every photo the shop adds returns
+     * INVALID_IMAGE_OPTIMIZE_REQUEST and renders blank. Local development
+     * never showed it, because there uploads are written to public/uploads and
+     * served from the same origin.
+     *
+     * Scoped to the account's own delivery path rather than all of
+     * res.cloudinary.com, so it cannot be pointed at somebody else's assets.
+     */
+    remotePatterns: cloudinaryCloud
+      ? [
+          {
+            protocol: "https" as const,
+            hostname: "res.cloudinary.com",
+            pathname: `/${cloudinaryCloud}/**`,
+          },
+        ]
+      : [],
   },
 
   experimental: {
