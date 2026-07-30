@@ -13,10 +13,13 @@ import { formatCents } from "@/lib/money";
 import { getSiteImages } from "@/lib/site-images";
 import { GALLERY_SLOT } from "@/lib/image-slots";
 import { SITE, HOURS_LABEL } from "@/lib/site";
+import { getCopy } from "@/lib/content";
+import { CopyText } from "@/components/CopyText";
 import Image from "next/image";
 
 export default async function HomePage() {
   const vehicle = await getVehicle();
+  const copy = await getCopy();
 
   const [featured, departments, quickPicks, services, recentWork, merch] = await Promise.all([
     // "In stock now" and the fitment count are about parts. Merch has its own
@@ -47,16 +50,13 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="max-w-3xl">
             <p className="m-rule eyebrow text-[0.7rem] text-muted">
-              Riverside, California · Turbocharged BMW only
+              {copy("home.hero.eyebrow")}
             </p>
             <h1 className="display mt-4 text-4xl leading-[0.95] text-balance sm:text-7xl">
-              BMW Performance
-              <br />
-              Specialists
+              <CopyText>{copy("home.hero.headline")}</CopyText>
             </h1>
             <p className="mt-6 max-w-xl text-base text-pretty text-muted sm:text-lg">
-              S55, S58, B58, N54 and N55. Turbo upgrades, ECU unlocks and custom tuning,
-              honest maintenance, and full race car builds, all done in-house.
+              {copy("home.hero.subhead")}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -200,14 +200,10 @@ export default async function HomePage() {
           <div className="flex flex-col justify-center px-4 py-14 sm:px-8 lg:px-14">
             <p className="rule-heading eyebrow text-[0.7rem] text-muted"><span className="section-index">01</span>Tuning, in-house</p>
             <h2 className="display mt-3 text-2xl sm:text-4xl">
-              We write the map.
-              <br />
-              Not a reseller.
+              <CopyText>{copy("home.tuning.heading")}</CopyText>
             </h2>
             <p className="mt-5 max-w-md text-sm text-pretty text-muted sm:text-base">
-              Unlocks, flashing platforms and custom calibration on our own dyno. We log,
-              adjust and re-log until the car is safe and making what it should on your fuel,
-              then we hand you a sheet that proves it.
+              {copy("home.tuning.body")}
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
@@ -232,7 +228,7 @@ export default async function HomePage() {
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
           <div>
             <p className="rule-heading eyebrow text-[0.7rem] text-muted"><span className="section-index">02</span>In the shop</p>
-            <h2 className="display mt-2 text-2xl sm:text-3xl">What we do best</h2>
+            <h2 className="display mt-2 text-2xl sm:text-3xl">{copy("home.services.heading")}</h2>
           </div>
           <Link
             href="/services"
@@ -269,7 +265,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <div className="mb-8 border-b border-line pb-5">
             <p className="rule-heading eyebrow text-[0.7rem] text-muted"><span className="section-index">03</span>Parts</p>
-            <h2 className="display mt-2 text-2xl sm:text-3xl">Shop by department</h2>
+            <h2 className="display mt-2 text-2xl sm:text-3xl">{copy("home.departments.heading")}</h2>
             {vehicle && (
               <p className="mt-2 text-sm text-muted">
                 Counts are what fits your {vehicleLabel(vehicle)}
@@ -333,9 +329,9 @@ export default async function HomePage() {
                 <p className="rule-heading eyebrow text-[0.7rem] text-muted">
                   <span className="section-index">05</span>Merch
                 </p>
-                <h2 className="display mt-2 text-2xl sm:text-3xl">Wear the shop</h2>
+                <h2 className="display mt-2 text-2xl sm:text-3xl">{copy("home.merch.heading")}</h2>
                 <p className="mt-2 text-sm text-muted">
-                  No car required. Ships with your parts if you order both.
+                  {copy("home.merch.blurb")}
                 </p>
               </div>
               <Link

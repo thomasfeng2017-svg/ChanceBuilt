@@ -373,6 +373,27 @@ model ShopSettings {
 }
 
 /**
+ * A piece of editable copy, addressed by key.
+ *
+ * Same idea as SiteImage slots: the key is a stable name the page asks for,
+ * and the default text lives in code (src/lib/content-blocks.ts). A row here
+ * overrides it. That means an empty table renders exactly what is written in
+ * the source, so the site never depends on someone having filled the CMS in,
+ * and a fresh checkout looks finished.
+ *
+ * Only marketing copy is exposed this way. Nav labels, button microcopy and
+ * error messages stay in code: making those editable does not help the shop
+ * and buries the fields that do.
+ */
+model ContentBlock {
+  /// Stable identifier, e.g. "home.hero.headline". Never shown to customers.
+  key   String @id
+  value String
+
+  updatedAt DateTime @updatedAt
+}
+
+/**
  * A date range the shop is shut regardless of opening hours: holidays,
  * vacation, a track weekend. The booking calendar refuses these days.
  */
