@@ -5,8 +5,7 @@ import { getSiteImages } from "@/lib/site-images";
 import { GalleryVideo } from "@/components/GalleryVideo";
 import { GALLERY_SLOT } from "@/lib/image-slots";
 import { getCopy } from "@/lib/content";
-import { CopyWithLink } from "@/components/CopyText";
-import { SITE } from "@/lib/site";
+import { CopyText } from "@/components/CopyText";
 
 export const metadata: Metadata = {
   title: "Gallery",
@@ -24,12 +23,7 @@ export default async function GalleryPage() {
         <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("gallery.eyebrow")}</p>
         <h1 className="display mt-2 text-3xl sm:text-5xl">{copy("gallery.heading")}</h1>
         <p className="mt-4 text-sm text-muted sm:text-base">
-          <CopyWithLink
-            text={copy("gallery.intro")}
-            phrase="Instagram"
-            href={SITE.social.instagram}
-            external
-          />
+          <CopyText>{copy("gallery.intro")}</CopyText>
         </p>
       </header>
 
@@ -116,7 +110,7 @@ export default async function GalleryPage() {
 
       <div className="mt-14 rounded-card border border-line bg-surface p-6 text-center sm:p-8">
         <h2 className="display text-xl">{copy("gallery.cta.heading")}</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted">{copy("gallery.cta.body")}</p>
+        <p className="mx-auto mt-2 max-w-md text-sm text-muted"><CopyText>{copy("gallery.cta.body")}</CopyText></p>
         <Link
           href="/book"
           className="focus-ring mt-5 inline-block rounded bg-accent px-8 py-3.5 text-sm font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"

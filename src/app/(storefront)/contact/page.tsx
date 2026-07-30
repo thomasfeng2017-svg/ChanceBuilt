@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { getCopy } from "@/lib/content";
-import { CopyWithLink } from "@/components/CopyText";
+import { CopyText } from "@/components/CopyText";
 import { SITE, HOURS_LABEL, addressLine } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export default async function ContactPage() {
         <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("contact.eyebrow")}</p>
         <h1 className="display mt-2 text-3xl sm:text-5xl">{copy("contact.heading")}</h1>
         <p className="mt-4 text-sm text-muted sm:text-base">
-          <CopyWithLink text={copy("contact.intro")} phrase="book online" href="/book" />
+          <CopyText>{copy("contact.intro")}</CopyText>
         </p>
       </header>
 

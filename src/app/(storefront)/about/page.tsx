@@ -32,9 +32,9 @@ export default async function AboutPage() {
       />
 
       <div className="mt-8 max-w-2xl space-y-5 text-sm leading-relaxed text-muted sm:text-base">
-        <p>{copy("about.para1")}</p>
-        <p>{copy("about.para2")}</p>
-        <p>{copy("about.para3")}</p>
+        <p><CopyText>{copy("about.para1")}</CopyText></p>
+        <p><CopyText>{copy("about.para2")}</CopyText></p>
+        <p><CopyText>{copy("about.para3")}</CopyText></p>
       </div>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

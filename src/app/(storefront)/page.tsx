@@ -56,7 +56,7 @@ export default async function HomePage() {
               <CopyText>{copy("home.hero.headline")}</CopyText>
             </h1>
             <p className="mt-6 max-w-xl text-base text-pretty text-muted sm:text-lg">
-              {copy("home.hero.subhead")}
+              <CopyText>{copy("home.hero.subhead")}</CopyText>
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -203,7 +203,7 @@ export default async function HomePage() {
               <CopyText>{copy("home.tuning.heading")}</CopyText>
             </h2>
             <p className="mt-5 max-w-md text-sm text-pretty text-muted sm:text-base">
-              {copy("home.tuning.body")}
+              <CopyText>{copy("home.tuning.body")}</CopyText>
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
@@ -331,7 +331,7 @@ export default async function HomePage() {
                 </p>
                 <h2 className="display mt-2 text-2xl sm:text-3xl">{copy("home.merch.heading")}</h2>
                 <p className="mt-2 text-sm text-muted">
-                  {copy("home.merch.blurb")}
+                  <CopyText>{copy("home.merch.blurb")}</CopyText>
                 </p>
               </div>
               <Link
@@ -406,7 +406,7 @@ export default async function HomePage() {
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-2">
           <div>
             <h2 className="display text-2xl sm:text-3xl">{copy("home.cta.heading")}</h2>
-            <p className="mt-3 max-w-md text-sm text-muted">{copy("home.cta.body")}</p>
+            <p className="mt-3 max-w-md text-sm text-muted"><CopyText>{copy("home.cta.body")}</CopyText></p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/book"

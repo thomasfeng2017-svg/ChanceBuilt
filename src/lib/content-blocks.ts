@@ -179,9 +179,9 @@ export const CONTENT_GROUPS: ContentGroup[] = [
       {
         key: "contact.intro",
         label: "Opening paragraph",
-        hint: "The words 'book online' become a link automatically, so keep that phrase in.",
+        hint: "Write a link as [the words](/where-it-goes). Internal pages start with a slash.",
         multiline: true,
-        text: "The fastest way to get on the calendar is to book online. For anything else, call the shop, we answer.",
+        text: "The fastest way to get on the calendar is to [book online](/book). For anything else, call the shop, we answer.",
       },
       {
         key: "contact.cta.heading",
@@ -213,9 +213,9 @@ export const CONTENT_GROUPS: ContentGroup[] = [
       {
         key: "gallery.intro",
         label: "Opening paragraph",
-        hint: "The word 'Instagram' becomes a link automatically, so keep it in.",
+        hint: "Write a link as [the words](/where-it-goes), or a full https:// address.",
         multiline: true,
-        text: "Builds, installs and race cars out of the shop. More on Instagram.",
+        text: "Builds, installs and race cars out of the shop. More on [Instagram](https://www.instagram.com/chancebuiltllc/).",
       },
       {
         key: "gallery.cta.heading",

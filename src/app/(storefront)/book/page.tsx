@@ -6,6 +6,7 @@ import { BookingFlow } from "@/components/BookingFlow";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE, HOURS_LABEL, addressLine } from "@/lib/site";
 import { getCopy } from "@/lib/content";
+import { CopyText } from "@/components/CopyText";
 
 export const metadata: Metadata = {
   title: "Book a service",
@@ -46,7 +47,7 @@ export default async function BookPage({
         <p className="m-rule eyebrow text-[0.7rem] text-muted">Riverside, California</p>
         <h1 className="display mt-2 text-3xl sm:text-4xl">{copy("book.heading")}</h1>
         <p className="mt-3 max-w-xl text-sm text-muted">
-          {copy("book.intro")}{" "}
+          <CopyText>{copy("book.intro")}</CopyText>{" "}
           <a href={SITE.phoneHref} className="focus-ring rounded text-text underline underline-offset-2">
             {SITE.phone}
           </a>{" "}
