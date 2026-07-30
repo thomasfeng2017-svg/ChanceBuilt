@@ -57,8 +57,25 @@ export async function SectionPhoto({
         fill
         sizes={sizes}
         priority={priority}
-        style={{ objectPosition: image.objectPosition }}
-        className={`photo-bw object-cover ${imageClassName}`}
+        /*
+          Zoom is a transform rather than a different crop, so it is applied on
+          top of whichever fit was chosen and never touches the stored file.
+
+          transform-origin is pinned to the same point as object-position, so
+          zooming in closes in on the part the shop picked instead of drifting
+          away from it towards the middle.
+        */
+        style={{
+          objectFit: image.objectFit,
+          objectPosition: image.objectPosition,
+          ...(image.scale !== 1
+            ? {
+                transform: `scale(${image.scale})`,
+                transformOrigin: image.objectPosition,
+              }
+            : {}),
+        }}
+        className={`photo-bw ${imageClassName}`}
       />
       {scrim && (
         <div

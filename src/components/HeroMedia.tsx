@@ -20,6 +20,21 @@ export async function HeroMedia() {
     return <div aria-hidden="true" className="shop-grid absolute inset-0" />;
   }
 
+  /*
+    Zoom, applied around the same point as the focal position so closing in
+    tightens on the chosen subject rather than drifting to the middle.
+
+    The forced `grayscale` that used to sit alongside these has gone. It was a
+    leftover from the monochrome palette, and once the rest of the site started
+    showing photographs in colour the hero was the only thing still draining
+    them. It already sits at 45% opacity under two gradients, so the colour
+    that comes through is a hint of the shop rather than a distraction.
+  */
+  const heroZoom =
+    hero.scale !== 1
+      ? { transform: `scale(${hero.scale})`, transformOrigin: hero.objectPosition }
+      : {};
+
   return (
     <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
       {hero.isVideo ? (
@@ -32,8 +47,8 @@ export async function HeroMedia() {
               fill
               priority
               sizes="100vw"
-              style={{ objectPosition: hero.objectPosition }}
-              className="object-cover opacity-45 grayscale"
+              style={{ objectFit: hero.objectFit, objectPosition: hero.objectPosition, ...heroZoom }}
+              className="opacity-45"
             />
           )}
           <video
@@ -44,8 +59,8 @@ export async function HeroMedia() {
             loop
             playsInline
             preload="metadata"
-            style={{ objectPosition: hero.objectPosition }}
-            className="hero-video absolute inset-0 h-full w-full object-cover opacity-45 grayscale"
+            style={{ objectFit: hero.objectFit, objectPosition: hero.objectPosition, ...heroZoom }}
+            className="hero-video absolute inset-0 h-full w-full opacity-45"
           />
         </>
       ) : (
@@ -55,8 +70,8 @@ export async function HeroMedia() {
           fill
           priority
           sizes="100vw"
-          style={{ objectPosition: hero.objectPosition }}
-          className="object-cover opacity-45 grayscale"
+          style={{ objectFit: hero.objectFit, objectPosition: hero.objectPosition, ...heroZoom }}
+          className="opacity-45"
         />
       )}
 

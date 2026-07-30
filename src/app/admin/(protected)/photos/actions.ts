@@ -55,6 +55,39 @@ export async function clearSlotAction(slot: string) {
   return { ok: true as const };
 }
 
+/**
+ * How the photo sits in its slot: fill vs whole photo, zoom, and how much
+ * vertical room the section gets.
+ *
+ * Zoom is clamped rather than trusted. It is a CSS transform, so a wild value
+ * would blow one pixel up across the whole band, and nothing about the form
+ * guarantees what arrives here.
+ */
+export async function setImageFramingAction(
+  id: string,
+  framing: {
+    fit?: "COVER" | "CONTAIN";
+    zoom?: number;
+    bandHeight?: "SHORT" | "MEDIUM" | "TALL";
+  },
+) {
+  await requireWriter("STAFF");
+
+  await prisma.siteImage.update({
+    where: { id },
+    data: {
+      ...(framing.fit ? { fit: framing.fit } : {}),
+      ...(framing.zoom != null
+        ? { zoom: Math.max(100, Math.min(300, Math.round(framing.zoom))) }
+        : {}),
+      ...(framing.bandHeight ? { bandHeight: framing.bandHeight } : {}),
+    },
+  });
+
+  refresh();
+  return { ok: true as const };
+}
+
 /** Focal point, as percentages of the image. */
 export async function setFocalPointAction(id: string, focalX: number, focalY: number) {
   await requireWriter("STAFF");

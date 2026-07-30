@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { formatCents } from "@/lib/money";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE } from "@/lib/site";
+import { bandPadding } from "@/lib/band-height";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -54,6 +55,8 @@ export default async function ServicesPage() {
     orderBy: [{ sortOrder: "asc" }],
   });
 
+  const servicesBand = await bandPadding("section:services-header");
+
   const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
     (acc[s.category] ??= []).push(s);
     return acc;
@@ -72,8 +75,8 @@ export default async function ServicesPage() {
           priority
           scrim
         />
-        {/* Taller band so the backdrop is not squeezed into a 4:1 letterbox. */}
-        <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+        {/* Band height is set per photo in the admin. */}
+        <div className={`relative mx-auto max-w-6xl px-4 sm:px-6 ${servicesBand}`}>
           <p className="m-rule eyebrow text-[0.7rem] text-muted">What we do</p>
           <h1 className="display mt-2 text-3xl sm:text-5xl">Services</h1>
         </div>

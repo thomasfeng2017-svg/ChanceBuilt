@@ -102,6 +102,9 @@ export default async function PhotosPage() {
                             focalY: row.focalY,
                             isVideo: row.kind === "VIDEO",
                             posterUrl: row.posterUrl,
+                            fit: row.fit,
+                            zoom: row.zoom,
+                            bandHeight: row.bandHeight,
                           }
                         : null
                     }

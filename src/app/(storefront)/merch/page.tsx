@@ -5,6 +5,7 @@ import { searchCatalog, getCategoryNav, PAGE_SIZE, type SortKey } from "@/lib/ca
 import { ProductCard } from "@/components/ProductCard";
 import { SortSelect } from "@/components/SortSelect";
 import { SectionPhoto } from "@/components/SectionPhoto";
+import { bandPadding } from "@/lib/band-height";
 
 export const metadata: Metadata = {
   title: "Shop merch",
@@ -56,6 +57,8 @@ export default async function MerchPage({
     ...parent.children.map((c) => ({ slug: c.slug, name: c.name, count: c.count })),
   ]);
 
+  const merchBand = await bandPadding("section:merch-banner");
+
   const pageUrl = (n: number) => {
     const next = new URLSearchParams();
     for (const [key, value] of Object.entries(sp)) {
@@ -82,7 +85,7 @@ export default async function MerchPage({
           priority
           scrim
         />
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className={`relative mx-auto max-w-7xl px-4 sm:px-6 ${merchBand}`}>
           <p className="m-rule eyebrow text-[0.7rem] text-muted">Shop merch</p>
           <h1 className="display mt-2 text-3xl sm:text-5xl">Wear the shop</h1>
           <p className="mt-3 max-w-lg text-sm text-muted">

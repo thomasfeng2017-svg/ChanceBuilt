@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FocalPicker } from "./FocalPicker";
 import { uploadFile } from "@/lib/upload-client";
+import { FramingControls } from "./FramingControls";
 import {
   setSlotImageAction,
   clearSlotAction,
@@ -18,6 +19,9 @@ export type SlotRow = {
   focalY: number;
   isVideo: boolean;
   posterUrl: string | null;
+  fit: "COVER" | "CONTAIN";
+  zoom: number;
+  bandHeight: "SHORT" | "MEDIUM" | "TALL";
 };
 
 /** One single-image slot: upload, focal point, alt text. */
@@ -77,6 +81,9 @@ export function SlotEditor({
     }
   }
 
+  /** Wide slots are the ones rendered as a full-width band. */
+  const isBanner = targetAspect >= 2;
+
   const preview = row?.url ?? fallbackUrl;
 
   return (
@@ -87,15 +94,26 @@ export function SlotEditor({
       </div>
 
       {row ? (
-        <FocalPicker
-          id={row.id}
-          url={row.url}
-          focalX={row.focalX}
-          focalY={row.focalY}
-          targetAspect={targetAspect}
-          isVideo={row.isVideo}
-          poster={row.posterUrl}
-        />
+        <>
+          <FocalPicker
+            id={row.id}
+            url={row.url}
+            focalX={row.focalX}
+            focalY={row.focalY}
+            targetAspect={targetAspect}
+            isVideo={row.isVideo}
+            poster={row.posterUrl}
+          />
+          <FramingControls
+            id={row.id}
+            fit={row.fit}
+            zoom={row.zoom}
+            bandHeight={row.bandHeight}
+            /* Only the wide banner slots render as a band with height worth
+               changing; a square engine tile has none to give. */
+            showHeight={isBanner}
+          />
+        </>
       ) : preview ? (
         <div className={`relative overflow-hidden border border-line bg-surface-2 ${aspectClass}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

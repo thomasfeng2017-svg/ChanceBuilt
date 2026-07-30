@@ -84,6 +84,19 @@ enum MediaKind {
   VIDEO
 }
 
+enum ImageFit {
+  /// Fill the space, cropping the overflow.
+  COVER
+  /// Show the whole photo, letting the background show at the edges.
+  CONTAIN
+}
+
+enum BandHeight {
+  SHORT
+  MEDIUM
+  TALL
+}
+
 model SiteImage {
   id   String    @id @default(cuid())
   slot String
@@ -119,6 +132,32 @@ model SiteImage {
    */
   focalX Int @default(50)
   focalY Int @default(50)
+
+  /**
+   * How the photo fills its slot.
+   *
+   * COVER fills the space and crops whatever does not fit. CONTAIN shows the
+   * whole photo and lets the background show at the edges instead.
+   *
+   * The focal point alone could only ever slide a fixed-size window around the
+   * photo; it could not make that window show MORE. For a shop whose
+   * photography is almost entirely vertical, being able to say "just fit the
+   * whole car in" is the difference between a usable photo and a cropped one.
+   */
+  fit ImageFit @default(COVER)
+
+  /**
+   * Zoom, as a percentage. 100 is the natural size for the chosen fit.
+   * Only meaningful with COVER, where it crops in tighter around the focal
+   * point. Applied as a CSS transform, so nothing is destroyed.
+   */
+  zoom Int @default(100)
+
+  /**
+   * How much vertical room the section gets, for slots rendered as a banner
+   * band. A taller band means a vertical photo loses less to the crop.
+   */
+  bandHeight BandHeight @default(MEDIUM)
 
   /// Shown under gallery images. Ignored elsewhere.
   caption String?

@@ -16,6 +16,7 @@ import { SortSelect } from "@/components/SortSelect";
 import { YmmSelector } from "@/components/YmmSelector";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE } from "@/lib/site";
+import { bandPadding } from "@/lib/band-height";
 
 export const metadata: Metadata = { title: "Parts catalog" };
 
@@ -84,6 +85,8 @@ export default async function PartsPage({
       : 0,
   ]);
 
+  const partsBand = await bandPadding("section:parts-banner");
+
   // Rebuild the query string for filter links (drops nothing, resets page).
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(sp)) {
@@ -147,7 +150,7 @@ export default async function PartsPage({
             sizes="100vw"
             scrim
           />
-          <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+          <div className={`relative mx-auto max-w-7xl px-4 sm:px-6 ${partsBand}`}>
             <p className="m-rule eyebrow text-[0.7rem] text-muted">The catalog</p>
             <h1 className="display mt-2 text-3xl sm:text-4xl">Parts</h1>
             <p className="mt-3 max-w-lg text-sm text-muted">

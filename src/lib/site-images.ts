@@ -24,6 +24,12 @@ export type SiteImageView = {
   /** Intrinsic size, when recorded. Null for older rows and the file fallback. */
   width: number | null;
   height: number | null;
+  /** "cover" crops to fill; "contain" shows the whole photo. */
+  objectFit: "cover" | "contain";
+  /** Zoom as a multiplier, ready for a CSS transform. 1 = no zoom. */
+  scale: number;
+  /** Vertical room for banner slots. */
+  bandHeight: "SHORT" | "MEDIUM" | "TALL";
 };
 
 /** Which public/ folder backs a slot, for the fallback path. */
@@ -50,6 +56,9 @@ const toView = (row: {
   posterUrl?: string | null;
   width?: number | null;
   height?: number | null;
+  fit?: "COVER" | "CONTAIN";
+  zoom?: number;
+  bandHeight?: "SHORT" | "MEDIUM" | "TALL";
 }): SiteImageView => ({
   url: row.url,
   alt: row.alt,
@@ -59,6 +68,11 @@ const toView = (row: {
   posterUrl: row.posterUrl ?? null,
   width: row.width ?? null,
   height: row.height ?? null,
+  objectFit: row.fit === "CONTAIN" ? "contain" : "cover",
+  // Clamped here rather than trusted: a bad row should not be able to blow a
+  // photo up to 50x and cover the page with one pixel.
+  scale: Math.min(3, Math.max(1, (row.zoom ?? 100) / 100)),
+  bandHeight: row.bandHeight ?? "MEDIUM",
 });
 
 /** One image for a single-image slot, or null. */
@@ -77,7 +91,7 @@ export async function getSiteImage(slot: string): Promise<SiteImageView | null> 
   if (files.length === 0) return null;
 
   if (slot === "hero") {
-    return { url: files[0], alt: "", caption: null, objectPosition: "50% 50%", isVideo: false, posterUrl: null, width: null, height: null };
+    return { url: files[0], alt: "", caption: null, objectPosition: "50% 50%", isVideo: false, posterUrl: null, width: null, height: null, objectFit: "cover" as const, scale: 1, bandHeight: "MEDIUM" as const };
   }
 
   const stem = fallbackStem(slot);
@@ -85,7 +99,7 @@ export async function getSiteImage(slot: string): Promise<SiteImageView | null> 
     const name = (f.split("/").pop() ?? "").replace(/\.[^.]+$/, "");
     return name === stem;
   });
-  return match ? { url: match, alt: "", caption: null, objectPosition: "50% 50%", isVideo: false, posterUrl: null, width: null, height: null } : null;
+  return match ? { url: match, alt: "", caption: null, objectPosition: "50% 50%", isVideo: false, posterUrl: null, width: null, height: null, objectFit: "cover" as const, scale: 1, bandHeight: "MEDIUM" as const } : null;
 }
 
 /** All images for a multi-image slot, in display order. */
@@ -108,6 +122,9 @@ export async function getSiteImages(slot: string): Promise<SiteImageView[]> {
     posterUrl: null,
     width: null,
     height: null,
+    objectFit: "cover" as const,
+    scale: 1,
+    bandHeight: "MEDIUM" as const,
   }));
 }
 
