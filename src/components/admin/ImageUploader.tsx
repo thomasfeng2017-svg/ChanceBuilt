@@ -69,7 +69,8 @@ export function ImageUploader({
           </button>
         </p>
         <p className="mt-1 text-xs text-muted">
-          JPEG, PNG or WebP, up to 4MB each. Resized and converted automatically.
+          JPEG, PNG or WebP. Large photos are shrunk in your browser before
+          uploading, so straight off a phone is fine.
         </p>
         <input
           ref={inputRef}

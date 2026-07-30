@@ -107,7 +107,8 @@ export function GalleryManager({
             </button>
           </p>
           <p className="mt-1 text-xs text-muted">
-            Up to 4MB each. They go to the end of the gallery. Reorder below.
+            Photos straight off a phone are fine. Videos must be under 4MB.
+            They go to the end of the gallery, and you can reorder below.
           </p>
           <input
             ref={inputRef}
