@@ -81,6 +81,11 @@ async function main() {
   const email = (arg("email") ?? (await ask("Email: "))).trim().toLowerCase();
   if (!email.includes("@")) throw new Error("That doesn't look like an email address.");
 
+  // Say which database this is writing to. Pointing the script at the wrong
+  // one looks identical to a wrong password from the login screen.
+  const host = (process.env.DATABASE_URL ?? "").replace(/.*@([^/?]+).*/, "$1");
+  console.log(`Database: ${host || "(DATABASE_URL not set)"}\n`);
+
   const existing = await prisma.user.findUnique({ where: { email } });
 
   const name = arg("name") ?? existing?.name ?? (await ask("Name: ")).trim();
@@ -90,7 +95,22 @@ async function main() {
   }
   const role = roleInput as Role;
 
-  const password = arg("password") ?? (await askHidden("Password (min 10 chars): "));
+  /**
+   * Typed twice when interactive.
+   *
+   * Entry is hidden, so a typo here is completely invisible: the account is
+   * created with a password nobody knows, and the only symptom later is
+   * "Email or password is incorrect" on a login that should work. Confirming
+   * costs one extra line and removes the whole failure mode.
+   */
+  let password = arg("password");
+  if (!password) {
+    password = await askHidden("Password (min 10 chars): ");
+    const again = await askHidden("Type it again to confirm: ");
+    if (password !== again) {
+      throw new Error("Those two passwords do not match. Nothing was changed. Run it again.");
+    }
+  }
   if (password.length < 10) throw new Error("Password must be at least 10 characters.");
 
   const passwordHash = await bcrypt.hash(password, 12);

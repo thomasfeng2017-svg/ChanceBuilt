@@ -45,3 +45,7 @@ public/uploads/
 
 # ...but the example IS committed: it documents every variable the app reads.
 !.env.example
+
+# Scratch file for the production DB string during setup. Never commit.
+neon-url.txt
+create-admin.bat
