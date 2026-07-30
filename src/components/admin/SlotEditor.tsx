@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FocalPicker } from "./FocalPicker";
+import { uploadFile } from "@/lib/upload-client";
 import {
   setSlotImageAction,
   clearSlotAction,
@@ -54,29 +55,22 @@ export function SlotEditor({
     setError(null);
     setBusy("Uploading…");
 
-    const body = new FormData();
-    body.append("file", file);
-    body.append("folder", "sections");
-
     try {
-      const res = await fetch("/api/admin/upload", { method: "POST", body });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error ?? "Upload failed.");
+      const upload = await uploadFile(file, "sections");
+      if (!upload.ok) {
+        setError(upload.error);
         return;
       }
       const result = await setSlotImageAction(
         slot,
-        json.url,
-        json.kind ?? "IMAGE",
-        json.posterUrl ?? null,
-        json.width || null,
-        json.height || null,
+        upload.url,
+        upload.kind,
+        upload.posterUrl,
+        upload.width,
+        upload.height,
       );
       if (!result.ok) setError(result.error);
       router.refresh();
-    } catch {
-      setError("Upload failed. Check your connection.");
     } finally {
       setBusy(null);
       if (inputRef.current) inputRef.current.value = "";

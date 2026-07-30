@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FocalPicker } from "./FocalPicker";
+import { uploadFile } from "@/lib/upload-client";
 import {
   addGalleryImagesAction,
   deleteImageAction,
@@ -49,29 +50,29 @@ export function GalleryManager({
       width: number | null;
       height: number | null;
     }[] = [];
+    const failures: string[] = [];
+
     for (const file of Array.from(files)) {
-      const body = new FormData();
-      body.append("file", file);
-      body.append("folder", "gallery");
-      try {
-        const res = await fetch("/api/admin/upload", { method: "POST", body });
-        const json = await res.json();
-        if (!res.ok) setError(json.error ?? "Upload failed.");
-        else
-          items.push({
-            url: json.url,
-            kind: json.kind ?? "IMAGE",
-            posterUrl: json.posterUrl ?? null,
-            // Recorded so the gallery can lay this out at its own shape rather
-            // than cropping it into a uniform tile.
-            width: json.width || null,
-            height: json.height || null,
-          });
-      } catch {
-        setError("Upload failed. Check your connection.");
+      const result = await uploadFile(file, "gallery");
+      if (result.ok) {
+        // width/height recorded so the gallery can lay this out at its own
+        // shape rather than cropping it into a uniform tile.
+        items.push({
+          url: result.url,
+          kind: result.kind,
+          posterUrl: result.posterUrl,
+          width: result.width,
+          height: result.height,
+        });
+      } else {
+        failures.push(result.error);
       }
       setUploading((n) => n - 1);
     }
+
+    // Report every failure. Dropping ten photos and being told about one is
+    // how a shop concludes the rest uploaded fine when they did not.
+    if (failures.length) setError(failures.join(" "));
 
     if (items.length) await addGalleryImagesAction(items);
     if (inputRef.current) inputRef.current.value = "";
@@ -106,7 +107,7 @@ export function GalleryManager({
             </button>
           </p>
           <p className="mt-1 text-xs text-muted">
-            They go to the end of the gallery. Reorder below.
+            Up to 4MB each. They go to the end of the gallery. Reorder below.
           </p>
           <input
             ref={inputRef}

@@ -1,5 +1,7 @@
 "use client";
 
+import { uploadFile } from "@/lib/upload-client";
+
 import Image from "next/image";
 import { useRef, useState } from "react";
 
@@ -28,23 +30,16 @@ export function ImageUploader({
     setUploading(files.length);
 
     const uploaded: string[] = [];
+    const failures: string[] = [];
+
     for (const file of Array.from(files)) {
-      const body = new FormData();
-      body.append("file", file);
-      body.append("folder", folder);
-      try {
-        const res = await fetch("/api/admin/upload", { method: "POST", body });
-        const json = await res.json();
-        if (!res.ok) {
-          setError(json.error ?? "Upload failed.");
-        } else {
-          uploaded.push(json.url);
-        }
-      } catch {
-        setError("Upload failed — check your connection.");
-      }
+      const result = await uploadFile(file, folder);
+      if (result.ok) uploaded.push(result.url);
+      else failures.push(result.error);
       setUploading((n) => n - 1);
     }
+
+    if (failures.length) setError(failures.join(" "));
 
     if (uploaded.length) onChange([...value, ...uploaded]);
     if (inputRef.current) inputRef.current.value = "";
@@ -74,7 +69,7 @@ export function ImageUploader({
           </button>
         </p>
         <p className="mt-1 text-xs text-muted">
-          JPEG, PNG or WebP. Resized and converted automatically.
+          JPEG, PNG or WebP, up to 4MB each. Resized and converted automatically.
         </p>
         <input
           ref={inputRef}

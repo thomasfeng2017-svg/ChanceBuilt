@@ -21,7 +21,22 @@ import sharp from "sharp";
  * deploying, or uploads will fail at runtime.
  */
 
-const MAX_INPUT_BYTES = 15 * 1024 * 1024; // 15MB before processing
+/**
+ * The real ceiling is the hosting platform, not this code.
+ *
+ * A Vercel serverless function rejects a request body over roughly 4.5MB
+ * BEFORE the handler runs, and the rejection is not JSON. So the old 15MB
+ * image limit was fiction: anything between 4.5MB and 15MB was refused by the
+ * platform, the client's `res.json()` threw on an HTML error page, and the
+ * shop was told "Upload failed. Check your connection." for a file that was
+ * simply too big. Most iPhone photos land in exactly that range.
+ *
+ * 4MB leaves headroom for the multipart envelope and the other form fields.
+ * Exported so the browser can reject an oversized file before spending a
+ * minute uploading it, and so the message can say what actually went wrong.
+ */
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 const MAX_EDGE = 1600;
 const WEBP_QUALITY = 82;
 
@@ -38,7 +53,13 @@ export type UploadResult =
     }
   | { ok: false; error: string };
 
-const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100MB
+/**
+ * Video is bound by the same platform limit as images: it travels through the
+ * same function. 100MB was never achievable. Anything longer than a few
+ * seconds of phone footage needs uploading to Cloudinary directly from the
+ * browser rather than relayed through here.
+ */
+const MAX_VIDEO_BYTES = MAX_UPLOAD_BYTES;
 
 /** Formats a browser can play directly. */
 const VIDEO_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
@@ -66,10 +87,10 @@ export async function processAndStore(
 ): Promise<UploadResult> {
   if (file.size === 0) return { ok: false, error: "That file is empty." };
   if (isVideoUpload(file)) return storeVideo(file, folder);
-  if (file.size > MAX_INPUT_BYTES) {
+  if (file.size > MAX_UPLOAD_BYTES) {
     return {
       ok: false,
-      error: `That image is ${(file.size / 1024 / 1024).toFixed(1)}MB. The limit is 15MB.`,
+      error: `That photo is ${(file.size / 1024 / 1024).toFixed(1)}MB. The limit is 4MB. On an iPhone, share it as "Large" instead of "Actual Size", or take a screenshot of it.`,
     };
   }
 
@@ -137,7 +158,7 @@ async function storeVideo(
   if (file.size > MAX_VIDEO_BYTES) {
     return {
       ok: false,
-      error: `That video is ${(file.size / 1024 / 1024).toFixed(0)}MB. The limit is 100MB. Trim it, or export at 1080p.`,
+      error: `That video is ${(file.size / 1024 / 1024).toFixed(1)}MB. The limit is 4MB, because it has to pass through the server. Trim it to a few seconds, or export at 720p.`,
     };
   }
   if (file.type && !VIDEO_TYPES.has(file.type) && !/\.(mp4|webm|mov|m4v)$/i.test(file.name)) {
