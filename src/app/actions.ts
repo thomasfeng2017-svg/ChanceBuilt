@@ -12,6 +12,7 @@ import {
   type Vehicle,
 } from "@/lib/garage";
 import { reserveSlot } from "@/lib/booking";
+import { subscribe } from "@/lib/subscribers";
 import { stripe, stripeConfigured, baseUrl } from "@/lib/stripe";
 import { sendBookingReceived, sendBookingAlert } from "@/lib/email";
 import {
@@ -369,4 +370,21 @@ export async function placeOrderAction(_prevState: unknown, formData: FormData) 
   }
 
   redirect(session.url);
+}
+
+// ------------------------------------------------------------ mailing list --
+
+/**
+ * Join the mailing list.
+ *
+ * Errors are returned rather than thrown: a failed signup must not replace the
+ * page someone was reading with an error screen.
+ */
+export async function subscribeAction(_prev: unknown, formData: FormData) {
+  const email = String(formData.get("email") ?? "");
+  const source = String(formData.get("source") ?? "footer");
+
+  const result = await subscribe(email, source);
+  if (!result.ok) return { ok: false as const, error: result.error };
+  return { ok: true as const };
 }

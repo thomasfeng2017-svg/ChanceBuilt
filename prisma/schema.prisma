@@ -481,6 +481,33 @@ model ShopClosure {
   @@index([startsOn, endsOn])
 }
 
+// ------------------------------------------------------------ mailing list --
+
+/**
+ * Someone who asked to hear from the shop.
+ *
+ * Kept in this database as well as pushed to the email provider, deliberately.
+ * A list that only exists in a vendor's dashboard is a list you do not own:
+ * changing provider, or losing access to the account, loses the audience the
+ * shop spent months building.
+ *
+ * Unsubscribes are a timestamp rather than a delete, so a re-subscribe is
+ * distinguishable from a first signup, and so an unsubscribed address is not
+ * silently re-added by a later form submission.
+ */
+model Subscriber {
+  id    String @id @default(cuid())
+  email String @unique
+
+  /// Where they signed up, e.g. "footer", "merch". Tells you what is working.
+  source String?
+
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([createdAt])
+}
+
 // -------------------------------------------------------- services/booking --
 
 enum ServiceCategory {

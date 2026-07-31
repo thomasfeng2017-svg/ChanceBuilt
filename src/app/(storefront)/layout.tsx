@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Logo } from "@/components/Logo";
 import { SITE, HOURS_LABEL, addressLine } from "@/lib/site";
+import { SubscribeForm } from "@/components/SubscribeForm";
 
 /**
  * Public storefront chrome.
@@ -72,6 +73,23 @@ export default function StorefrontLayout({
             breakpoint left each one around 150px, which is too narrow for the
             opening hours: both the day range and the time wrapped onto two
             lines each and the block turned to mush. */}
+        {/* Mailing list, above the columns so it is not buried. Most of the
+            catalog is still waiting on stock, so "tell me when parts land" is
+            a far stronger ask right now than a newsletter signup. */}
+        <div className="border-b border-line/60">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="display text-lg">Parts landing soon</p>
+              <p className="mt-1 max-w-md text-sm text-muted">
+                New stock, group buys and build features. No spam, and one click to stop.
+              </p>
+            </div>
+            <div className="w-full lg:max-w-sm">
+              <SubscribeForm source="footer" />
+            </div>
+          </div>
+        </div>
+
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           <div className="md:col-span-1">
             <Logo height={44} />
