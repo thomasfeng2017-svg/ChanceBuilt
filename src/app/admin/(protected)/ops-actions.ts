@@ -27,13 +27,37 @@ export async function markOrderShippedAction(
 ) {
   await requireWriter("STAFF");
 
+  const carrier = input.carrier.trim() || null;
+  const trackingNumber = input.trackingNumber.trim() || null;
+
+  /*
+    Carrier and tracking are both required, checked here rather than only in
+    the form. Client-side validation is a convenience; this is the rule.
+
+    Two reasons, and the second is the serious one:
+
+    Telling someone their order shipped without a way to find the parcel
+    generates a support call instead of preventing one.
+
+    More importantly, this shop sells parts costing thousands. Proof of
+    delivery is what wins a chargeback: card networks put the burden on the
+    merchant, and "we posted it" without a carrier and a number is not
+    evidence. An order marked shipped with nothing recorded is an order that
+    cannot be defended if the customer disputes it.
+  */
+  if (!trackingNumber || !carrier) {
+    return {
+      ok: false as const,
+      error: !carrier
+        ? "Enter the carrier before marking this order shipped."
+        : "Enter a tracking number before marking this order shipped.",
+    };
+  }
+
   const before = await prisma.order.findUnique({
     where: { id: orderId },
     select: { status: true },
   });
-
-  const carrier = input.carrier.trim() || null;
-  const trackingNumber = input.trackingNumber.trim() || null;
 
   const order = await prisma.order.update({
     where: { id: orderId },

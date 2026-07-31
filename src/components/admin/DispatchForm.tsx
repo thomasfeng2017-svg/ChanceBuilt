@@ -16,6 +16,10 @@ import { markOrderShippedAction } from "@/app/admin/(protected)/ops-actions";
  * week, and a fixed list would need a code change the first time they use
  * someone not on it. Known names get a tracking link in the email; unknown
  * ones still send the number.
+ *
+ * Both fields are required. These are parts costing thousands, and the carrier
+ * plus number is what proves delivery if a customer disputes the charge. The
+ * server enforces this too: the check here only saves a round trip.
  */
 export function DispatchForm({
   orderId,
@@ -35,19 +39,32 @@ export function DispatchForm({
   const [tracking, setTracking] = useState(initialTracking ?? "");
   const [notify, setNotify] = useState(!alreadyShipped);
   const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const input =
     "focus-ring w-full rounded border border-field bg-surface-2 px-3 py-2 text-sm placeholder:text-muted/50";
 
+  // Both are required. These are parts costing thousands: without a carrier
+  // and a number there is no proof of delivery, and no way to defend a
+  // chargeback if the customer says it never arrived.
+  const ready = carrier.trim().length > 0 && tracking.trim().length > 0;
+
   function submit() {
     setResult(null);
+    setError(null);
     startTransition(async () => {
       const r = await markOrderShippedAction(orderId, {
         carrier,
         trackingNumber: tracking,
         notify,
       });
+
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+
       setResult(
         !r.firstTime
           ? "Tracking updated. No email sent."
@@ -76,6 +93,7 @@ export function DispatchForm({
             value={carrier}
             onChange={(e) => setCarrier(e.target.value)}
             placeholder="UPS, USPS, FedEx…"
+            required
             className={input}
           />
         </label>
@@ -84,11 +102,17 @@ export function DispatchForm({
           <input
             value={tracking}
             onChange={(e) => setTracking(e.target.value)}
-            placeholder="Optional"
+            placeholder="Required"
+            required
             className={`${input} font-mono`}
           />
         </label>
       </div>
+
+      <p className="mt-2 text-xs text-muted">
+        Both are required. On parts at these prices the tracking is your proof of delivery
+        if a customer ever disputes the charge.
+      </p>
 
       {!alreadyShipped && (
         <label className="mt-3 flex items-start gap-2.5">
@@ -107,12 +131,24 @@ export function DispatchForm({
 
       <button
         type="button"
-        disabled={pending}
+        disabled={pending || !ready}
         onClick={submit}
-        className="focus-ring mt-4 rounded bg-accent px-6 py-2.5 text-xs font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi disabled:opacity-50"
+        className="focus-ring mt-4 rounded bg-accent px-6 py-2.5 text-xs font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi disabled:opacity-40"
       >
         {pending ? "Saving…" : alreadyShipped ? "Update tracking" : "Mark shipped"}
       </button>
+
+      {!ready && (
+        <p className="mt-2 text-xs text-muted">
+          Fill in the carrier and tracking number to continue.
+        </p>
+      )}
+
+      {error && (
+        <p role="alert" className="mt-3 text-xs font-medium text-bad">
+          {error}
+        </p>
+      )}
 
       {result && (
         <p role="status" className="mt-3 text-xs text-muted">
