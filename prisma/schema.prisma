@@ -366,6 +366,20 @@ model Order {
   stripePaymentIntentId String?
   paidAt                DateTime?
 
+  /**
+   * Dispatch details, entered by the shop when the parcel goes out.
+   *
+   * Kept as free text rather than an enum of carriers: a shop posts things
+   * however is cheapest that week, and an enum would need a code change the
+   * first time they use someone not on the list. The tracking link is derived
+   * from the carrier name where it is recognised, and simply omitted when it
+   * is not, so an unknown carrier degrades to a number the customer can paste
+   * themselves rather than blocking dispatch.
+   */
+  carrier        String?
+  trackingNumber String?
+  shippedAt      DateTime?
+
   /// Shipping address captured by Stripe Checkout.
   shipName    String?
   shipLine1   String?

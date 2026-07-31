@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireUser, canWrite } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import { StatusSelect } from "@/components/admin/StatusSelect";
+import { DispatchForm } from "@/components/admin/DispatchForm";
 import { setOrderStatusAction } from "../../ops-actions";
 
 export const metadata = { title: "Order" };
@@ -55,6 +56,23 @@ export default async function OrderDetailPage({
           No payment has been taken for this order — checkout doesn&apos;t charge yet. Mark it
           paid only once you&apos;ve collected the money another way.
         </p>
+      )}
+
+      {/* Dispatch: only meaningful once the money is in. */}
+      {canWrite(user.role) && (order.status === "PAID" || order.status === "SHIPPED") && (
+        <div className="mb-6">
+          <DispatchForm
+            orderId={order.id}
+            alreadyShipped={order.status === "SHIPPED"}
+            carrier={order.carrier}
+            trackingNumber={order.trackingNumber}
+            shippedAt={
+              order.shippedAt
+                ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(order.shippedAt)
+                : null
+            }
+          />
+        </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">

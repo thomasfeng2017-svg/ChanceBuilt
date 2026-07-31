@@ -171,6 +171,79 @@ export async function sendOrderConfirmation(order: OrderEmailData): Promise<bool
   });
 }
 
+/**
+ * Tracking URL for the carriers this shop actually posts with.
+ *
+ * Matched loosely on the name the shop typed, because they will write "ups",
+ * "UPS Ground" or "United Parcel" depending on the day. An unrecognised
+ * carrier returns null and the email shows the bare tracking number, which the
+ * customer can paste into a search. That is a much better outcome than
+ * refusing to accept a carrier that is not on a hardcoded list.
+ */
+function trackingUrl(carrier: string | null, tracking: string | null): string | null {
+  if (!carrier || !tracking) return null;
+  const c = carrier.toLowerCase();
+  const t = encodeURIComponent(tracking.trim());
+
+  if (c.includes("ups")) return `https://www.ups.com/track?tracknum=${t}`;
+  if (c.includes("usps") || c.includes("postal")) {
+    return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${t}`;
+  }
+  if (c.includes("fedex")) return `https://www.fedex.com/fedextrack/?trknbr=${t}`;
+  if (c.includes("dhl")) return `https://www.dhl.com/en/express/tracking.html?AWB=${t}`;
+  return null;
+}
+
+export type ShippedEmailData = OrderEmailData & {
+  carrier: string | null;
+  trackingNumber: string | null;
+};
+
+export async function sendOrderShipped(order: ShippedEmailData): Promise<boolean> {
+  const url = trackingUrl(order.carrier, order.trackingNumber);
+
+  const tracking = order.trackingNumber
+    ? `<p style="margin:16px 0 0;font-size:14px;">
+         ${order.carrier ? `${escapeHtml(order.carrier)} &middot; ` : ""}
+         ${
+           url
+             ? `<a href="${url}" style="color:#0066b1;">${escapeHtml(order.trackingNumber)}</a>`
+             : `<strong>${escapeHtml(order.trackingNumber)}</strong>`
+         }
+       </p>`
+    : "";
+
+  const address = order.shipping?.line1
+    ? `<p style="margin:16px 0 0;font-size:13px;color:#71717a;">On its way to<br>
+        <span style="color:#18181b;">
+          ${[order.shipping.name, order.shipping.line1, order.shipping.line2, `${order.shipping.city ?? ""} ${order.shipping.state ?? ""} ${order.shipping.postal ?? ""}`]
+            .filter(Boolean)
+            .map((l) => escapeHtml(String(l).trim()))
+            .filter(Boolean)
+            .join("<br>")}
+        </span></p>`
+    : "";
+
+  return send({
+    to: order.email,
+    subject: `Order ${order.number} has shipped`,
+    html: shell(
+      "On its way",
+      `<p style="margin:0 0 4px;">Order <strong>${escapeHtml(order.number)}</strong> has left the shop.</p>
+       ${order.vehicleLabel ? `<p style="margin:0 0 16px;font-size:13px;color:#71717a;">For your ${escapeHtml(order.vehicleLabel)}</p>` : ""}
+       ${tracking}
+       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;font-size:14px;">
+         ${itemRows(order.items)}
+       </table>
+       ${address}
+       <p style="margin:20px 0 0;font-size:13px;color:#71717a;">
+         Anything not right when it arrives, reply to this email and we'll sort it.
+       </p>`,
+    ),
+    replyTo: shopInbox(),
+  });
+}
+
 export async function sendOrderAlert(order: OrderEmailData): Promise<boolean> {
   return send({
     to: shopInbox(),

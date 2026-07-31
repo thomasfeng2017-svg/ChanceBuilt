@@ -16,7 +16,7 @@ export type ShippingAddress = {
   country?: string | null;
 };
 
-function toEmailData(order: {
+export function toEmailData(order: {
   number: string;
   email: string;
   subtotalCents: number;

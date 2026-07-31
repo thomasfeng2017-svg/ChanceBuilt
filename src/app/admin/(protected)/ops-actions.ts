@@ -4,10 +4,66 @@ import { revalidatePath } from "next/cache";
 import type { AppointmentStatus, OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireWriter } from "@/lib/auth";
-import { sendBookingConfirmed } from "@/lib/email";
-import { markOrderPaid } from "@/lib/orders";
+import { sendBookingConfirmed, sendOrderShipped } from "@/lib/email";
+import { markOrderPaid, toEmailData } from "@/lib/orders";
 
 const ORDER_STATUSES: OrderStatus[] = ["PENDING", "PAID", "SHIPPED", "CANCELLED"];
+
+/**
+ * Mark an order dispatched, record the tracking, and tell the customer.
+ *
+ * Separate from the plain status dropdown because shipping is the one
+ * transition that needs information alongside it. Making the shop set the
+ * status and then remember to fill in a tracking box afterwards is how
+ * customers end up with a "shipped" email and no way to find the parcel.
+ *
+ * The email fires only on the transition INTO shipped, so correcting a typo in
+ * the tracking number afterwards does not send a second one. Re-notifying is
+ * deliberately a separate decision.
+ */
+export async function markOrderShippedAction(
+  orderId: string,
+  input: { carrier: string; trackingNumber: string; notify: boolean },
+) {
+  await requireWriter("STAFF");
+
+  const before = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { status: true },
+  });
+
+  const carrier = input.carrier.trim() || null;
+  const trackingNumber = input.trackingNumber.trim() || null;
+
+  const order = await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      status: "SHIPPED",
+      carrier,
+      trackingNumber,
+      // Preserve the original dispatch date if this is an edit, not a re-ship.
+      shippedAt: before?.status === "SHIPPED" ? undefined : new Date(),
+    },
+    include: { items: true },
+  });
+
+  const firstTime = before?.status !== "SHIPPED";
+  let emailed = false;
+
+  if (firstTime && input.notify) {
+    // Never let an email failure undo a dispatch that has already happened.
+    const [result] = await Promise.allSettled([
+      sendOrderShipped({ ...toEmailData(order), carrier, trackingNumber }),
+    ]);
+    emailed = result.status === "fulfilled" && result.value === true;
+  }
+
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${order.number}`);
+  revalidatePath("/admin");
+
+  return { ok: true as const, emailed, firstTime };
+}
 const APPOINTMENT_STATUSES: AppointmentStatus[] = [
   "REQUESTED",
   "CONFIRMED",

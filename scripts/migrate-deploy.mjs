@@ -24,6 +24,9 @@
  * if the integration ever stops providing the unpooled variable.
  */
 import { spawnSync } from "node:child_process";
+// Locally the URL lives in .env, which only Prisma's own config was loading.
+// On a host the variables are already in the environment and this is a no-op.
+import "dotenv/config";
 
 const pooled = process.env.DATABASE_URL ?? "";
 
