@@ -22,7 +22,9 @@ export async function Header() {
     <header className="sticky top-0 z-40 border-b border-line bg-ink/95 backdrop-blur supports-[backdrop-filter]:bg-ink/85">
       <div className="border-b border-line/60">
         <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-[0.7rem] text-muted sm:px-6">
-          BMW performance specialists · Riverside, CA ·{" "}
+          {/* Uses the tagline rather than repeating it, so this bar and the
+              footer can never drift apart. */}
+          {SITE.tagline} · {SITE.address.city}, {SITE.address.state} ·{" "}
           <a href={SITE.phoneHref} className="focus-ring rounded text-text hover:underline">
             {SITE.phone}
           </a>
