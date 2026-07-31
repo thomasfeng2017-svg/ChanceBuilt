@@ -56,7 +56,7 @@ export async function markOrderShippedAction(
 
   const before = await prisma.order.findUnique({
     where: { id: orderId },
-    select: { status: true },
+    select: { status: true, trackingNumber: true },
   });
 
   const order = await prisma.order.update({
@@ -71,7 +71,18 @@ export async function markOrderShippedAction(
     include: { items: true },
   });
 
-  const firstTime = before?.status !== "SHIPPED";
+  /*
+    Whether the customer still needs telling.
+
+    Not simply "did the status just change", because an order could already be
+    marked SHIPPED with no tracking recorded — which is what the old status
+    dropdown allowed. Those customers were never notified and would otherwise
+    be stuck permanently unnotifiable, since the status transition had already
+    happened. Adding the missing tracking counts as the dispatch.
+
+    Correcting a typo on an order that already had tracking does NOT re-send.
+  */
+  const firstTime = before?.status !== "SHIPPED" || !before?.trackingNumber;
   let emailed = false;
 
   if (firstTime && input.notify) {

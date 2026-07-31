@@ -9,7 +9,16 @@ import { setOrderStatusAction } from "../../ops-actions";
 
 export const metadata = { title: "Order" };
 
-const ORDER_STATUSES = ["PENDING", "PAID", "SHIPPED", "CANCELLED"] as const;
+/*
+  SHIPPED is deliberately absent.
+
+  It is set through the dispatch form below, which requires a carrier and a
+  tracking number and sends the customer their notification. Leaving it in this
+  dropdown was a way to mark an order shipped with neither: no proof of
+  delivery, and the customer never told. Two orders were already dispatched
+  that way before this was noticed.
+*/
+const ORDER_STATUSES = ["PENDING", "PAID", "CANCELLED"] as const;
 
 export default async function OrderDetailPage({
   params,
