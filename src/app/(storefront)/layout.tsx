@@ -68,7 +68,11 @@ export default function StorefrontLayout({
       </main>
 
       <footer className="mt-20 border-t border-line bg-surface">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
+        {/* Two columns before four. Going straight to four at the md
+            breakpoint left each one around 150px, which is too narrow for the
+            opening hours: both the day range and the time wrapped onto two
+            lines each and the block turned to mush. */}
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           <div className="md:col-span-1">
             <Logo height={44} />
             <p className="eyebrow mt-3 text-[0.6rem] text-muted">{SITE.tagline}</p>
@@ -124,25 +128,38 @@ export default function StorefrontLayout({
               <br />
               {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
             </address>
-            <a
-              href={SITE.phoneHref}
-              className="focus-ring mt-1 inline-block rounded py-1.5 text-sm font-semibold hover:text-muted"
-            >
-              {SITE.phone}
-            </a>
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(addressLine)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="focus-ring inline-block rounded py-1.5 text-sm text-muted underline underline-offset-2 hover:text-text"
-            >
-              Directions
-            </a>
-            <dl className="mt-4 space-y-1 text-xs text-muted">
+            {/*
+              Stacked in a flex column rather than left as two inline-block
+              anchors on consecutive lines. JSX drops the whitespace between
+              sibling elements that sit on separate lines, so the phone number
+              and Directions rendered welded together as
+              "(951) 539-2901Directions". A gap here cannot be lost the way a
+              literal space can.
+            */}
+            <div className="mt-2 flex flex-col items-start gap-1">
+              <a
+                href={SITE.phoneHref}
+                className="focus-ring rounded py-0.5 text-sm font-semibold hover:text-muted"
+              >
+                {SITE.phone}
+              </a>
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(addressLine)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="focus-ring rounded py-0.5 text-sm text-muted underline underline-offset-2 hover:text-text"
+              >
+                Directions
+              </a>
+            </div>
+
+            {/* Capped width so the closing times sit near the days instead of
+                being flung to the far edge of a wide column. */}
+            <dl className="mt-5 max-w-[16rem] space-y-1.5 text-xs text-muted">
               {HOURS_LABEL.map((h) => (
-                <div key={h.days} className="flex justify-between gap-3">
-                  <dt>{h.days}</dt>
-                  <dd>{h.time}</dd>
+                <div key={h.days} className="flex flex-wrap justify-between gap-x-4">
+                  <dt className="whitespace-nowrap">{h.days}</dt>
+                  <dd className="whitespace-nowrap text-text/80">{h.time}</dd>
                 </div>
               ))}
             </dl>
