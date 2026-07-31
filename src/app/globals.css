@@ -57,7 +57,13 @@
   */
   --color-field: #66666b;
   --color-text: #f4f4f5;
-  --color-muted: #8b8b90;
+  /*
+    Secondary text. Lightened from #8b8b90 (5.88:1) to 7.76:1 on the ink
+    background. Most body copy on this site is muted, and pale grey on black
+    at a normal weight reads thin no matter how large it is, so the colour
+    matters as much as the size here.
+  */
+  --color-muted: #a1a1a8;
 
   /*
     Primary action colour: M blue.
@@ -101,14 +107,14 @@
     scale is in rem, so that would inflate every padding, gap and max-width
     at the same time and loosen the whole layout. This moves the text only.
   */
-  --text-xs: 0.8125rem; /* 13px */
+  --text-xs: 0.875rem; /* 14px */
   --text-xs--line-height: 1.5;
-  --text-sm: 0.9375rem; /* 15px */
+  --text-sm: 1rem; /* 16px */
   --text-sm--line-height: 1.6;
-  --text-base: 1.0625rem; /* 17px */
+  --text-base: 1.125rem; /* 18px */
   --text-base--line-height: 1.65;
-  --text-lg: 1.1875rem; /* 19px */
-  --text-lg--line-height: 1.55;
+  --text-lg: 1.25rem; /* 20px */
+  --text-lg--line-height: 1.5;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-barlow-condensed), var(--font-inter), sans-serif;
@@ -132,6 +138,15 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /*
+    Slightly heavier than the 400 default.
+
+    Light type on a dark background optically thins out: the same weight that
+    looks right as black on white looks spindly as near-white on near-black.
+    Inter is loaded as a variable font, so 450 is available and costs nothing
+    extra. Anything Tailwind marks as semibold or bold still overrides this.
+  */
+  font-weight: 450;
 }
 
 /*
