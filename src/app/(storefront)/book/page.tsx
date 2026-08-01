@@ -74,8 +74,15 @@ export default async function BookPage({
         initialServiceId={initial?.id}
       />
 
-      <aside className="mt-14 grid gap-6 overflow-hidden rounded-card border border-line bg-surface sm:grid-cols-[1fr_1fr_14rem]">
-        <div className="p-6 sm:pr-0">
+      {/* The photo only joins the row at lg. Squeezing it in from sm left the
+          two text columns about 180px each, which is not enough for an address
+          and a set of opening hours side by side: the street address came apart
+          one word per line. Below lg the two columns get the full width and the
+          photo, which is decoration, sits out; below md they stack, because a
+          640px screen split in two still cannot hold "Monday - Friday" and
+          "10:00 AM - 6:00 PM" on one line. */}
+      <aside className="mt-14 grid gap-6 overflow-hidden rounded-card border border-line bg-surface md:grid-cols-2 lg:grid-cols-[1fr_1fr_14rem]">
+        <div className="p-6 md:pr-0">
           <p className="eyebrow mb-2 text-[0.65rem] text-muted">Where</p>
           <address className="text-sm not-italic">
             {SITE.address.street}
@@ -91,13 +98,18 @@ export default async function BookPage({
             Open in Maps
           </a>
         </div>
-        <div className="p-6 sm:pl-0">
+        <div className="p-6 md:pl-0">
           <p className="eyebrow mb-2 text-[0.65rem] text-muted">Hours</p>
+          {/* Both sides are nowrap. Left to wrap, the closing time broke onto
+              its own line as a stranded "PM", and the day range split after the
+              dash as "Monday -" / "Friday". Neither is long enough to need two
+              lines; they were only wrapping because this column is the narrow
+              one in a three-up grid. */}
           <dl className="space-y-1 text-sm">
             {HOURS_LABEL.map((h) => (
               <div key={h.days} className="flex justify-between gap-4">
-                <dt className="text-muted">{h.days}</dt>
-                <dd>{h.time}</dd>
+                <dt className="whitespace-nowrap text-muted">{h.days}</dt>
+                <dd className="whitespace-nowrap">{h.time}</dd>
               </div>
             ))}
           </dl>
@@ -106,7 +118,7 @@ export default async function BookPage({
         <SectionPhoto
           slot="section:book-shop"
           alt="A customer car in for service at ChanceBuilt Performance"
-          className="hidden min-h-[13rem] sm:block"
+          className="hidden min-h-[13rem] lg:block"
           sizes="14rem"
         />
       </aside>

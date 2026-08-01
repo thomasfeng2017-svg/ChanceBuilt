@@ -73,11 +73,16 @@ export default async function ContactPage() {
 
         <div className="rounded-card border border-line bg-surface p-6">
           <p className="eyebrow text-[0.65rem] text-muted">Hours</p>
+          {/* Only the time is nowrap here. These cards sit two-up and are about
+              240px inside their padding, which fits the time (169px with its
+              gap) but not the time and "Monday - Friday" together (294px).
+              Pinning both would push the card wider than the grid and scroll the
+              whole page sideways. */}
           <dl className="mt-2 space-y-2 text-sm">
             {HOURS_LABEL.map((h) => (
               <div key={h.days} className="flex justify-between gap-4">
                 <dt className="text-muted">{h.days}</dt>
-                <dd>{h.time}</dd>
+                <dd className="whitespace-nowrap">{h.time}</dd>
               </div>
             ))}
           </dl>

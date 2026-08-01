@@ -428,8 +428,8 @@ export default async function HomePage() {
             <dl className="space-y-2 text-sm">
               {HOURS_LABEL.map((h) => (
                 <div key={h.days} className="flex justify-between gap-4 border-b border-line pb-2 last:border-0">
-                  <dt className="text-muted">{h.days}</dt>
-                  <dd className="font-medium">{h.time}</dd>
+                  <dt className="whitespace-nowrap text-muted">{h.days}</dt>
+                  <dd className="whitespace-nowrap font-medium">{h.time}</dd>
                 </div>
               ))}
             </dl>

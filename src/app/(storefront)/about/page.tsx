@@ -70,11 +70,15 @@ export default async function AboutPage() {
         </div>
         <div>
           <h2 className="display text-lg">Hours</h2>
+          {/* Time nowrap, day label free to wrap. This column is about 247px on
+              a small tablet, which holds the time but not the time and
+              "Monday - Friday" together. See the contact page for the same
+              trade. */}
           <dl className="mt-3 space-y-2 text-sm">
             {HOURS_LABEL.map((h) => (
               <div key={h.days} className="flex justify-between gap-4">
                 <dt className="text-muted">{h.days}</dt>
-                <dd>{h.time}</dd>
+                <dd className="whitespace-nowrap">{h.time}</dd>
               </div>
             ))}
           </dl>
