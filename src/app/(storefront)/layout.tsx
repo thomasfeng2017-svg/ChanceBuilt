@@ -132,7 +132,7 @@ export default function StorefrontLayout({
           <div>
             <p className="eyebrow mb-3 text-[0.65rem] text-muted">Shop</p>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/parts" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">All parts</Link></li>
+              <li><Link href="/parts" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">All Parts</Link></li>
               <li><Link href="/parts?category=tuning" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">Tuning</Link></li>
               <li><Link href="/parts?category=turbo" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">Turbo</Link></li>
               <li><Link href="/parts?category=exhaust" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">Exhaust</Link></li>
@@ -143,10 +143,10 @@ export default function StorefrontLayout({
           <div>
             <p className="eyebrow mb-3 text-[0.65rem] text-muted">Shop services</p>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/services" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">All services</Link></li>
-              <li><Link href="/book" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">Book an appointment</Link></li>
+              <li><Link href="/services" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">All Services</Link></li>
+              <li><Link href="/book" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">Book an Appointment</Link></li>
               <li><Link href="/gallery" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">Gallery</Link></li>
-              <li><Link href="/about" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">About the shop</Link></li>
+              <li><Link href="/about" className="focus-ring inline-block rounded py-1.5 text-muted hover:text-text">About the Shop</Link></li>
             </ul>
           </div>
 
