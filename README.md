@@ -236,6 +236,15 @@ that engine, each with its own production years, skipping any already covered.
 Those presets are generated from `Model.engineCodes` — real data, not a
 hardcoded list — so they stay correct as vehicles are added.
 
+**Remove by engine** is the matching undo. Twelve rows arrive on one click and
+the preset buttons sit next to each other, so clicking B58 when you meant S58 is
+easy to do and was a dozen clicks to unpick. It deletes on the engine recorded
+on the *fitment row*, not on the chassis's engine list: plenty of BMW chassis
+were sold with more than one engine, so matching by chassis would take out rows
+added deliberately for a different engine that merely share a car. The buttons
+are built from the rows actually present, so the counts are exact, and rows
+added by hand without an engine are not swept up by them.
+
 ### Photos
 
 `/admin/photos` manages every image on the public site except product shots,
@@ -280,6 +289,31 @@ on disk. Both are safe to re-run.
 
 **The gallery is masonry**, laid out from the recorded dimensions, so vertical
 photos display whole rather than being cropped into a uniform grid.
+
+### Product photos are framed per photo
+
+Product shots are not in `SiteImage`. They live on the product, and their
+framing lives in `Product.imageSettings`: a JSON object keyed by image URL,
+holding a focal point, a zoom and a fit for each one.
+
+Keyed by URL rather than by position, because photos get reordered and an
+index-keyed map would quietly hand each crop to a different photo. Removing a
+photo drops its entry, on the client and again in `saveProductAction`, so the
+JSON does not accumulate orphans.
+
+`Product.imageFit` and `imageZoom` are still there and still meaningful: they
+are the default for every photo nobody has framed by hand. `productFraming()` in
+`src/lib/product-images.ts` resolves the two, and every render site goes through
+it rather than assembling the fallback itself.
+
+The default is **Show whole photo**, which is right for a parts catalog. These
+are shot on a bench at whatever angle was convenient, and a card that crops half
+the turbo off is worse than one with some space around it. **Fill the box** is
+the opt-in, and only then is there anything to crop: that is why the crop
+rectangle in the picker appears in that mode alone, and why it shrinks as zoom
+goes up. Zoom is a CSS `transform: scale()` with `transform-origin` pinned to
+the same point as `object-position`, so it crops in around the chosen point
+rather than the middle.
 
 ### The manifest is keyed by filename, not position
 
