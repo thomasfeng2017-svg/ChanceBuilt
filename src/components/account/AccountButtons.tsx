@@ -38,7 +38,6 @@ export function SelectVehicleButton({
   vehicleId: string;
   canFilter: boolean;
 }) {
-  const router = useRouter();
   const [pending, start] = useTransition();
 
   if (!canFilter) {
@@ -53,15 +52,12 @@ export function SelectVehicleButton({
     <button
       type="button"
       disabled={pending}
-      onClick={() =>
-        start(async () => {
-          await selectVehicleAction(vehicleId);
-          router.refresh();
-        })
-      }
+      // No router.refresh() afterwards: the action redirects to the catalog,
+      // which is the navigation, and anything queued after it would not run.
+      onClick={() => start(async () => void (await selectVehicleAction(vehicleId)))}
       className="focus-ring rounded text-sm font-semibold text-accent-text transition-colors hover:text-text disabled:opacity-50"
     >
-      {pending ? "Selecting…" : "Shop for this car →"}
+      {pending ? "Opening parts…" : "Shop for this car →"}
     </button>
   );
 }

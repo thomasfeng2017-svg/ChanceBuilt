@@ -196,6 +196,15 @@ export async function addVehicleAction(_prev: AuthState, formData: FormData): Pr
   redirect(`/account/garage/${vehicle.id}`);
 }
 
+/**
+ * Make this the car the catalog filters by, then go to the catalog.
+ *
+ * The navigation is the point. This used to set the cookie and refresh in
+ * place, which left you looking at the same build sheet: a control labelled
+ * "Shop for this car" with an arrow on it had no visible effect at all, and on
+ * a car that was already selected it had no effect whatsoever, since the cookie
+ * write changed nothing either.
+ */
 export async function selectVehicleAction(vehicleId: string) {
   const customer = await requireCustomerAction();
   const vehicle = await prisma.garageVehicle.findFirst({
@@ -205,6 +214,7 @@ export async function selectVehicleAction(vehicleId: string) {
 
   await selectCookie(toCookieVehicle(vehicle));
   revalidatePath("/", "layout");
+  redirect("/parts");
 }
 
 export async function updateVehicleAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
