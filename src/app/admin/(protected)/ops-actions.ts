@@ -154,6 +154,11 @@ export async function setAppointmentStatusAction(appointmentId: string, status: 
     include: { service: true },
   });
 
+  // Completed work lands on the customer's build sheet, on the transition only.
+  if (status === "COMPLETED" && before?.status !== "COMPLETED") {
+    await recordServiceOnBuildSheet(appointmentId);
+  }
+
   // Tell the customer when a request becomes a confirmed booking. Only on the
   // transition, so re-saving the same status doesn't email them again.
   if (status === "CONFIRMED" && before?.status !== "CONFIRMED") {
@@ -183,4 +188,49 @@ export async function setAppointmentStatusAction(appointmentId: string, status: 
   revalidatePath(`/admin/appointments/${appointment.reference}`);
   revalidatePath("/admin");
   return { ok: true as const };
+}
+
+/**
+ * Put a completed job on the customer's build sheet.
+ *
+ * Only when the booking was made by a signed-in account with one of their own
+ * cars selected. A guest booking has no car to attach to, and guessing from the
+ * free-text vehicle fields would put work on the wrong car, which on a build
+ * sheet the shop later tunes from is worse than leaving it off.
+ *
+ * Idempotent on appointmentId, so re-completing a job cannot double it up.
+ * Failures are swallowed: the build sheet is a convenience and must never be
+ * what stops the shop marking a job done.
+ */
+async function recordServiceOnBuildSheet(appointmentId: string): Promise<void> {
+  try {
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: { service: true },
+    });
+    if (!appointment?.garageVehicleId) return;
+
+    const already = await prisma.mod.findFirst({
+      where: { appointmentId },
+      select: { id: true },
+    });
+    if (already) return;
+
+    await prisma.mod.create({
+      data: {
+        vehicleId: appointment.garageVehicleId,
+        name: appointment.service.name,
+        // Title case from the enum: TUNING becomes Tuning, matching the
+        // categories used everywhere else on the sheet.
+        category:
+          appointment.service.category.charAt(0) +
+          appointment.service.category.slice(1).toLowerCase(),
+        installedAt: appointment.startsAt,
+        source: "INSTALLED_BY_SHOP",
+        appointmentId,
+      },
+    });
+  } catch (e) {
+    console.error("[ops] couldn't record service on build sheet:", e);
+  }
 }

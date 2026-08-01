@@ -242,14 +242,48 @@ model Customer {
   /// Deactivating beats deleting: it keeps orders attached to a real person.
   active       Boolean @default(true)
 
+  /**
+   * Brute-force brake.
+   *
+   * Counted per account rather than per IP because an attacker rotates
+   * addresses freely but has to keep hitting the same account, and because a
+   * per-IP counter needs shared state that serverless does not have. A short
+   * lock after several misses costs an honest typo almost nothing and makes
+   * guessing a password impractical.
+   */
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+
   vehicles     GarageVehicle[]
   sessions     CustomerSession[]
+  resetTokens  CustomerPasswordReset[]
   orders       Order[]
   appointments Appointment[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   lastLogin DateTime?
+}
+
+/**
+ * A password-reset link that has been emailed out.
+ *
+ * Same rule as sessions: the link carries a random token and only its SHA-256
+ * hash is stored, so a database dump cannot be used to seize an account. Short
+ * lived, single use, and every outstanding token for a customer is burned when
+ * one is used or a new one is requested.
+ */
+model CustomerPasswordReset {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+  @@index([expiresAt])
 }
 
 /// Same scheme as the staff `Session`: the cookie carries a random token and
@@ -343,12 +377,16 @@ model Mod {
   product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   orderId   String?
   order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  /// Set when this entry came from a job the shop completed.
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([vehicleId])
   @@index([productId])
+  @@index([appointmentId])
 }
 
 // ----------------------------------------------------------------- catalog --
@@ -761,6 +799,8 @@ model Appointment {
 
   garageVehicleId String?
   garageVehicle   GarageVehicle? @relation(fields: [garageVehicleId], references: [id], onDelete: SetNull)
+
+  mods Mod[]
 
   notes     String?
   createdAt DateTime @default(now())

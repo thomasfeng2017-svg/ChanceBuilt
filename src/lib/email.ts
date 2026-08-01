@@ -346,3 +346,48 @@ function detailRow(label: string, value: string): string {
     <td style="padding:6px 0;">${escapeHtml(value).replace(/\n/g, "<br>")}</td>
   </tr>`;
 }
+
+/**
+ * Password reset link.
+ *
+ * The URL is also printed as text, because plenty of mail clients and corporate
+ * link scanners mangle or pre-fetch buttons, and a reset link that has already
+ * been "clicked" by a scanner is a support call.
+ *
+ * No reply-to on this one: a password email should not invite a reply carrying
+ * the link back out to a shared shop inbox.
+ */
+export async function sendPasswordReset(
+  to: string,
+  name: string,
+  url: string,
+  minutes: number,
+): Promise<boolean> {
+  const safeUrl = escapeHtml(url);
+  return send({
+    to,
+    subject: "Reset your ChanceBuilt password",
+    html: shell(
+      "Reset your password",
+      `<p style="margin:0 0 16px;">
+         Hi ${escapeHtml(name.split(" ")[0] ?? "there")}, someone asked to reset the
+         password on your ChanceBuilt account.
+       </p>
+       <p style="margin:0 0 22px;">
+         <a href="${safeUrl}"
+            style="display:inline-block;background:#0066b1;color:#ffffff;text-decoration:none;
+                   padding:13px 26px;border-radius:4px;font-weight:700;letter-spacing:0.04em;">
+           Choose a new password
+         </a>
+       </p>
+       <p style="margin:0 0 16px;font-size:13px;color:#71717a;">
+         Or paste this into your browser:<br>
+         <span style="word-break:break-all;color:#3f3f46;">${safeUrl}</span>
+       </p>
+       <p style="margin:0;font-size:13px;color:#71717a;">
+         The link works once and expires in ${minutes} minutes. If this wasn't you,
+         ignore this email and nothing will change.
+       </p>`,
+    ),
+  });
+}

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { requireCustomer } from "@/lib/customer-auth";
+import { requireCustomer } from "@/lib/customer-guards";
 import { getGarage } from "@/lib/customer-garage";
 import { prisma } from "@/lib/db";
 import { formatCents } from "@/lib/money";
 import { AddVehicleForm } from "@/components/account/AddVehicleForm";
 import { SignOutButton, SelectVehicleButton } from "@/components/account/AccountButtons";
+import { ChangePasswordForm } from "@/components/account/PasswordForms";
 
 export const metadata: Metadata = { title: "Your garage" };
 
@@ -140,6 +141,14 @@ export default async function AccountPage({
             ))}
           </ul>
         )}
+      </section>
+
+      {/* -------------------------------------------------------- security -- */}
+      <section className="mb-12">
+        <h2 className="display mb-4 text-lg">Password</h2>
+        <div className="rounded-card border border-line bg-surface p-5">
+          <ChangePasswordForm />
+        </div>
       </section>
 
       {/* ---------------------------------------------------- appointments -- */}

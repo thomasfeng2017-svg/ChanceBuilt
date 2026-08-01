@@ -2,9 +2,9 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import bcrypt from "bcryptjs";
 import type { UserRole } from "@prisma/client";
 import { prisma } from "./db";
+import { hashPassword, verifyPassword } from "./passwords";
 
 /**
  * Session-cookie authentication for the admin.
@@ -21,7 +21,9 @@ import { prisma } from "./db";
 
 export const SESSION_COOKIE = "cb_session";
 const SESSION_DAYS = 14;
-const BCRYPT_ROUNDS = 12;
+
+// Re-exported so existing callers keep importing these from here.
+export { hashPassword, verifyPassword };
 
 export type SessionUser = {
   id: string;
@@ -31,14 +33,6 @@ export type SessionUser = {
 };
 
 const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
-
-export async function hashPassword(plain: string): Promise<string> {
-  return bcrypt.hash(plain, BCRYPT_ROUNDS);
-}
-
-export async function verifyPassword(plain: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(plain, hash);
-}
 
 // ---------------------------------------------------------------- sessions --
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireCustomer } from "@/lib/customer-auth";
+import { requireCustomer } from "@/lib/customer-guards";
 import {
   getGarageVehicle,
   getClaimableOrders,

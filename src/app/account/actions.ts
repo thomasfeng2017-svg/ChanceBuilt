@@ -6,11 +6,17 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import {
   authenticateCustomer,
+  changePassword,
   createCustomerSession,
   destroyCustomerSession,
   registerCustomer,
+  requestPasswordReset,
   requireCustomerAction,
+  resetPassword,
+  RESET_TOKEN_MINUTES,
 } from "@/lib/customer-auth";
+import { sendPasswordReset } from "@/lib/email";
+import { baseUrl } from "@/lib/stripe";
 import { toCookieVehicle } from "@/lib/customer-garage";
 import { GARAGE_COOKIE, GARAGE_MAX_AGE, GARAGE_BAR_COOKIE } from "@/lib/vehicle";
 
@@ -57,6 +63,78 @@ export async function logoutAction() {
   await destroyCustomerSession();
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+// -------------------------------------------------------- password resets --
+
+export type NoticeState = { ok: boolean; message: string } | null;
+
+/**
+ * Always reports the same thing, whether or not the address has an account.
+ * Saying "no account found" would turn this form into a way of finding out who
+ * shops here.
+ */
+export async function requestResetAction(
+  _prev: NoticeState,
+  formData: FormData,
+): Promise<NoticeState> {
+  const email = String(formData.get("email") ?? "");
+
+  await requestPasswordReset(
+    email,
+    (to, name, url) => sendPasswordReset(to, name, url, RESET_TOKEN_MINUTES),
+    baseUrl(),
+  );
+
+  return {
+    ok: true,
+    message:
+      "If there's an account with that address, a reset link is on its way. It expires in an hour.",
+  };
+}
+
+export async function resetPasswordAction(
+  _prev: NoticeState,
+  formData: FormData,
+): Promise<NoticeState> {
+  const token = String(formData.get("token") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  if (password !== confirm) {
+    return { ok: false, message: "Those two passwords don't match." };
+  }
+
+  const result = await resetPassword(token, password);
+  if (!result.ok) return { ok: false, message: result.error };
+
+  // Deliberately not signed in here. Resetting destroys every session,
+  // including any an intruder held, and making them type the new password once
+  // proves it is the one they meant.
+  redirect("/account/login?reset=1");
+}
+
+export async function changePasswordAction(
+  _prev: NoticeState,
+  formData: FormData,
+): Promise<NoticeState> {
+  const customer = await requireCustomerAction();
+
+  const next = String(formData.get("password") ?? "");
+  if (next !== String(formData.get("confirm") ?? "")) {
+    return { ok: false, message: "Those two passwords don't match." };
+  }
+
+  const result = await changePassword(
+    customer.id,
+    String(formData.get("current") ?? ""),
+    next,
+  );
+  if (!result.ok) return { ok: false, message: result.error };
+
+  // Every session went, including this one, so send them back to sign in.
+  revalidatePath("/", "layout");
+  redirect("/account/login?changed=1");
 }
 
 // ----------------------------------------------------------------- garage --

@@ -35,7 +35,15 @@ export function LoginForm({ next }: { next?: string }) {
       </label>
 
       <label className="block">
-        <span className={label}>Password</span>
+        <span className="mb-1.5 flex items-baseline justify-between gap-3">
+          <span className="text-sm font-semibold">Password</span>
+          <Link
+            href="/account/forgot"
+            className="focus-ring rounded text-xs text-muted underline underline-offset-2 hover:text-text"
+          >
+            Forgot it?
+          </Link>
+        </span>
         <input
           name="password"
           type="password"
