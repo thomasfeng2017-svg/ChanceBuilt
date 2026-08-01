@@ -69,6 +69,11 @@ export const SITE: SiteDetails = {
     instagram: "https://www.instagram.com/chancebuiltllc/",
     // Unconfirmed: both @chancebuiltllc and @chancebuiltperformance 404.
     youtube: "",
+    yelp: "https://www.yelp.com/biz/chancebuilt-performance-riverside",
+    // Resolves to the Google Business listing for ChanceBuilt Performance LLC
+    // (knowledge graph id /g/11m75qhpd_). Kept as the short share link rather
+    // than the expanded search URL, which carries tracking parameters.
+    google: "https://share.google/0iQV3XgDFgenKHfyl",
     tiktok: "https://www.tiktok.com/@chancebuiltperformance",
   },
 

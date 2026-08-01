@@ -89,6 +89,10 @@ export default async function ContactPage() {
           { label: "Instagram", href: SITE.social.instagram },
           { label: "YouTube", href: SITE.social.youtube },
           { label: "TikTok", href: SITE.social.tiktok },
+          // Review platforms belong on the contact page more than the footer:
+          // this is where someone deciding whether to trust the shop is looking.
+          { label: "Reviews on Yelp", href: SITE.social.yelp },
+          { label: "Google Business", href: SITE.social.google },
         ]
           // Unset accounts are dropped rather than shown as dead links.
           .filter((s): s is { label: string; href: string } => !!s.href)
