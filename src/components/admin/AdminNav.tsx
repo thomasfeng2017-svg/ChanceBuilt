@@ -22,6 +22,7 @@ const ITEMS: Item[] = [
   { href: "/admin/subscribers", label: "Mailing list" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/appointments", label: "Appointments" },
+  { href: "/admin/customers", label: "Customers" },
   { href: "/admin/users", label: "Users", ownerOnly: true },
 ];
 

@@ -57,8 +57,9 @@ model Model {
   yearStart Int
   yearEnd   Int
 
-  fitments     Fitment[]
-  appointments Appointment[]
+  fitments       Fitment[]
+  appointments   Appointment[]
+  garageVehicles GarageVehicle[]
 
   @@unique([makeId, slug])
   @@index([makeId, name])
@@ -215,6 +216,141 @@ model Session {
   @@index([expiresAt])
 }
 
+// --------------------------------------------------------------- customers --
+
+/**
+ * A customer account.
+ *
+ * Deliberately NOT the same table as `User`, which is the shop's own staff
+ * login. `User.role` defaults to STAFF, so a customer row in that table is one
+ * defaulting mistake away from holding keys to the admin. Two tables, two
+ * session cookies, no shared blast radius. The password hashing and the
+ * hashed-token session scheme are shared, because those are worth having
+ * identical in both places.
+ *
+ * Accounts are an upgrade, never a gate: guests still browse, book and check
+ * out. Orders and appointments therefore keep their own email column and are
+ * linked to an account opportunistically, by matching that email.
+ */
+model Customer {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  name         String
+  phone        String?
+  /// bcrypt hash — plaintext passwords are never stored or logged.
+  passwordHash String
+  /// Deactivating beats deleting: it keeps orders attached to a real person.
+  active       Boolean @default(true)
+
+  vehicles     GarageVehicle[]
+  sessions     CustomerSession[]
+  orders       Order[]
+  appointments Appointment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+}
+
+/// Same scheme as the staff `Session`: the cookie carries a random token and
+/// only its SHA-256 hash is stored, so a database dump cannot be replayed.
+model CustomerSession {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  userAgent  String?
+
+  @@index([customerId])
+  @@index([expiresAt])
+}
+
+/**
+ * A car in someone's garage.
+ *
+ * The year/make/model are denormalised alongside the soft link to `Model`
+ * because a customer's car has to survive the catalog changing underneath it.
+ * If a Model row is retired, the garage should still say "2018 BMW M3 (F80)"
+ * rather than going blank, so `modelId` is SetNull and the text is the record.
+ */
+model GarageVehicle {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  year      Int
+  makeName  String
+  modelName String
+  chassis   String?
+
+  /// Soft link back to the catalog, used for fitment when this car is selected.
+  modelId String?
+  model   Model?  @relation(fields: [modelId], references: [id], onDelete: SetNull)
+
+  /// "The daily", "track car". Optional, and only shown when set.
+  nickname String?
+  /// Free text the owner keeps about the car: plate, VIN, colour, whatever.
+  notes    String?
+
+  mods         Mod[]
+  orders       Order[]
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+/// Where a mod on a build sheet came from. Provenance matters here: "we fitted
+/// this" and "the owner says it is fitted" are different claims, and the shop
+/// should be able to tell them apart at a glance before it tunes the car.
+enum ModSource {
+  /// Bought from this shop. Created from a paid order.
+  PURCHASED
+  /// Work this shop performed. Created from an appointment or by staff.
+  INSTALLED_BY_SHOP
+  /// Entered by the owner.
+  OWNER
+}
+
+/**
+ * One modification on a build sheet.
+ *
+ * `name` is stored rather than always read through `productId` so a mod
+ * survives the product being archived or renamed, and so a part bought
+ * elsewhere reads the same as one bought here.
+ */
+model Mod {
+  id        String        @id @default(cuid())
+  vehicleId String
+  vehicle   GarageVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  name     String
+  /// Free text: "Turbo", "Suspension", "Tune". Not the catalog category enum,
+  /// because plenty of mods have no catalog equivalent.
+  category String?
+  notes    String?
+  /// Nullable: people rarely remember the date, and demanding it loses the mod.
+  installedAt DateTime?
+
+  source ModSource @default(OWNER)
+
+  /// Soft links back to where this came from, when it came from us.
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  orderId   String?
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vehicleId])
+  @@index([productId])
+}
+
 // ----------------------------------------------------------------- catalog --
 
 enum CatalogKind {
@@ -318,6 +454,7 @@ model Product {
 
   fitments   Fitment[]
   orderItems OrderItem[]
+  mods       Mod[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -406,10 +543,28 @@ model Order {
   shipPostal  String?
   shipCountry String?
 
+  /**
+   * The account this order belongs to, when there is one.
+   *
+   * Optional because guest checkout stays: the email column remains the source
+   * of truth for reaching the customer, and this is filled in either at
+   * checkout when they are signed in, or later when someone registers with the
+   * same address and their past orders are claimed.
+   */
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  /// The garage car this was bought for, when the customer had one selected.
+  /// What lets a paid order turn itself into build-sheet entries.
+  garageVehicleId String?
+  garageVehicle   GarageVehicle? @relation(fields: [garageVehicleId], references: [id], onDelete: SetNull)
+
   items     OrderItem[]
+  mods      Mod[]
   createdAt DateTime    @default(now())
 
   @@index([email])
+  @@index([customerId])
 }
 
 // ------------------------------------------------------------- shop config --
@@ -600,12 +755,20 @@ model Appointment {
   modelId String?
   model   Model?  @relation(fields: [modelId], references: [id], onDelete: SetNull)
 
+  /// Same opportunistic link as Order: guests can still book.
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  garageVehicleId String?
+  garageVehicle   GarageVehicle? @relation(fields: [garageVehicleId], references: [id], onDelete: SetNull)
+
   notes     String?
   createdAt DateTime @default(now())
 
   // The index the availability query lives on.
   @@index([startsAt, status])
   @@index([email])
+  @@index([customerId])
 }
 
 model OrderItem {

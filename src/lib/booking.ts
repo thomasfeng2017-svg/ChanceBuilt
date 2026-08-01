@@ -278,6 +278,10 @@ export async function reserveSlot(input: {
     chassis?: string | null;
     modelId?: string | null;
   } | null;
+  /** Set when the booking was made by a signed-in account. */
+  customerId?: string | null;
+  /** The car from that account's garage, when one was selected. */
+  garageVehicleId?: string | null;
 }): Promise<{ ok: true; reference: string } | { ok: false; error: string }> {
   const service = await prisma.service.findUnique({ where: { id: input.serviceId } });
   if (!service || !service.active) {
@@ -331,6 +335,8 @@ export async function reserveSlot(input: {
           vehicleModel: input.vehicle?.model ?? null,
           vehicleChassis: input.vehicle?.chassis ?? null,
           modelId: input.vehicle?.modelId ?? null,
+          customerId: input.customerId ?? null,
+          garageVehicleId: input.garageVehicleId ?? null,
         },
       });
     });

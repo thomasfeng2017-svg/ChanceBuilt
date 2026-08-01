@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getVehicle, garageBarHidden } from "@/lib/garage";
 import { getCartCount } from "@/lib/cart";
+import { getSessionCustomer } from "@/lib/customer-auth";
 import { GarageBar } from "./GarageBar";
 import { SearchBox } from "./SearchBox";
 import { Logo } from "./Logo";
@@ -16,10 +17,11 @@ const NAV = [
 ];
 
 export async function Header() {
-  const [vehicle, cartCount, barHidden] = await Promise.all([
+  const [vehicle, cartCount, barHidden, customer] = await Promise.all([
     getVehicle(),
     getCartCount(),
     garageBarHidden(),
+    getSessionCustomer(),
   ]);
 
   return (
@@ -54,6 +56,23 @@ export async function Header() {
             className="focus-ring hidden rounded bg-accent px-5 py-2.5 text-xs font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi sm:block"
           >
             Book service
+          </Link>
+
+          {/* Signed out this reads "Sign in", which is a weaker invitation than
+              "Create an account" but the right one: someone who already has an
+              account should not have to hunt, and the register page is one
+              click from the sign-in page. */}
+          <Link
+            href={customer ? "/account" : "/account/login"}
+            className="focus-ring hidden items-center gap-2 rounded border border-line px-3.5 py-2.5 text-sm font-semibold transition-colors hover:border-line-hi sm:flex"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span className="hidden lg:inline">
+              {customer ? customer.name.split(" ")[0] : "Sign in"}
+            </span>
           </Link>
 
           <Link
@@ -97,6 +116,16 @@ export async function Header() {
               className="focus-ring eyebrow block px-3 py-3 text-[0.7rem] whitespace-nowrap text-accent-text"
             >
               Book service
+            </Link>
+          </li>
+          {/* The account button in the bar above is hidden on small screens,
+              so it needs a home in the nav or a phone can't reach it at all. */}
+          <li className="sm:hidden">
+            <Link
+              href={customer ? "/account" : "/account/login"}
+              className="focus-ring eyebrow block px-3 py-3 text-[0.7rem] whitespace-nowrap text-muted"
+            >
+              {customer ? "My garage" : "Sign in"}
             </Link>
           </li>
         </ul>

@@ -15,6 +15,15 @@ export type Vehicle = {
   modelName: string;
   /** BMW chassis code, when the model has one (F80, G80, ...). */
   chassis?: string | null;
+  /**
+   * Set when this selection came from a saved car in an account's garage.
+   *
+   * The cookie stays the single source of "what am I shopping for" for guests
+   * and account holders alike, so none of the fitment code had to learn about
+   * accounts. This id is what lets an order be stamped with the car it was
+   * bought for, which is how a purchase becomes a build-sheet entry.
+   */
+  savedId?: string | null;
 };
 
 export const GARAGE_COOKIE = "garage";
@@ -46,7 +55,18 @@ export function parseVehicle(raw: string): Vehicle | null {
     ) {
       return null;
     }
-    return v as Vehicle;
+    return {
+      year: v.year,
+      makeId: v.makeId,
+      makeName: v.makeName,
+      modelId: v.modelId,
+      modelName: v.modelName,
+      chassis: typeof v.chassis === "string" ? v.chassis : null,
+      // Whitelisted rather than spread: this value is read back from a cookie
+      // the customer controls and is used to look up a garage row, so it must
+      // be a string or absent, never an object someone hand-edited in.
+      savedId: typeof v.savedId === "string" ? v.savedId : null,
+    };
   } catch {
     return null;
   }

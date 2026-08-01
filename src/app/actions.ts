@@ -12,6 +12,7 @@ import {
   vehicleLabel,
   type Vehicle,
 } from "@/lib/garage";
+import { getSessionCustomer } from "@/lib/customer-auth";
 import { reserveSlot } from "@/lib/booking";
 import { subscribe } from "@/lib/subscribers";
 import { stripe, stripeConfigured, baseUrl } from "@/lib/stripe";
@@ -209,9 +210,22 @@ export async function bookAppointmentAction(input: {
     return { ok: false as const, error: "Please pick an appointment time." };
   }
 
+  // Attach to an account when signed in, so the booking shows up in their
+  // history and the shop can see it against the right car. Guests book exactly
+  // as before.
+  const account = await getSessionCustomer();
+  let garageVehicleId: string | null = null;
+
   // Prefer the garage vehicle; fall back to whatever they typed.
   let vehicle: Parameters<typeof reserveSlot>[0]["vehicle"] = null;
   const garage = await getVehicle();
+  if (account && garage?.savedId) {
+    const owned = await prisma.garageVehicle.findFirst({
+      where: { id: garage.savedId, customerId: account.id },
+      select: { id: true },
+    });
+    garageVehicleId = owned?.id ?? null;
+  }
   if (input.useGarageVehicle !== false && garage) {
     vehicle = {
       year: garage.year,
@@ -236,6 +250,8 @@ export async function bookAppointmentAction(input: {
     phone,
     notes: notes || undefined,
     vehicle,
+    customerId: account?.id ?? null,
+    garageVehicleId,
   });
 
   if (!result.ok) return { ok: false as const, error: result.error };
@@ -309,10 +325,31 @@ export async function placeOrderAction(_prevState: unknown, formData: FormData) 
   const number = `CB${Date.now().toString(36).toUpperCase()}`;
   const vehicles = [...new Set(cart.lines.map((l) => l.vehicleLabel).filter(Boolean))];
 
+  /*
+    Attach the order to an account when there is one.
+
+    The garage vehicle is taken from the selection cookie rather than a form
+    field, and then re-checked against the signed-in customer, so an id someone
+    edited into their own cookie cannot pin an order to a stranger's car. Both
+    are optional: guest checkout is untouched by all of this.
+  */
+  const customer = await getSessionCustomer();
+  const selected = await getVehicle();
+  let garageVehicleId: string | null = null;
+  if (customer && selected?.savedId) {
+    const owned = await prisma.garageVehicle.findFirst({
+      where: { id: selected.savedId, customerId: customer.id },
+      select: { id: true },
+    });
+    garageVehicleId = owned?.id ?? null;
+  }
+
   const order = await prisma.order.create({
     data: {
       number,
       email,
+      customerId: customer?.id ?? null,
+      garageVehicleId,
       subtotalCents: cart.subtotalCents,
       shippingCents: cart.shippingCents,
       taxCents: cart.taxCents,
