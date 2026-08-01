@@ -98,7 +98,12 @@ export default function StorefrontLayout({
           </div>
         </div>
 
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+        {/* The last column is wider than the other three. It carries the
+            address, phone, directions and the opening hours, while the two
+            middle columns are short link lists. Four equal columns left it at
+            210px on a 1024 screen, which is less than one line of hours needs,
+            so the times wrapped no matter what the cap above says. */}
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-[1fr_1fr_1fr_1.5fr]">
           <div className="md:col-span-1">
             <Logo height={44} />
             <p className="eyebrow mt-3 text-[0.6rem] text-muted">{SITE.tagline}</p>
@@ -183,8 +188,14 @@ export default function StorefrontLayout({
             </div>
 
             {/* Capped width so the closing times sit near the days instead of
-                being flung to the far edge of a wide column. */}
-            <dl className="mt-5 max-w-[16rem] space-y-1.5 text-xs text-muted">
+                being flung to the far edge of a wide column.
+
+                17rem, not 16. Both halves are nowrap and "Monday - Friday" plus
+                "10:00 AM - 6:00 PM" plus the gap measure 259px, so a 256px cap
+                missed by three pixels and flex-wrap dropped every weekday time
+                onto its own line. Saturday and Sunday are shorter, so they fit
+                and the block came out ragged. */}
+            <dl className="mt-5 max-w-[17rem] space-y-1.5 text-xs text-muted">
               {HOURS_LABEL.map((h) => (
                 <div key={h.days} className="flex flex-wrap justify-between gap-x-4">
                   <dt className="whitespace-nowrap">{h.days}</dt>
