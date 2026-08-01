@@ -6,6 +6,7 @@ import {
   addFitmentAction,
   addFitmentByEngineAction,
   removeFitmentAction,
+  removeFitmentByEngineAction,
 } from "@/app/admin/(protected)/products/actions";
 
 type Make = { id: string; name: string };
@@ -147,6 +148,24 @@ export function FitmentEditor({
     });
   }
 
+  function removePreset(code: string, count: number) {
+    // Confirmed, because one click can undo a dozen rows and there is no undo
+    // for the undo. The count is in the prompt so it is clear how much goes.
+    if (!confirm(`Remove all ${count} ${code} fitment ${count === 1 ? "row" : "rows"}?`)) {
+      return;
+    }
+    setMessage(null);
+    startTransition(async () => {
+      const result = await removeFitmentByEngineAction(productId, code);
+      if (!result.ok) {
+        setMessage({ tone: "bad", text: result.error });
+        return;
+      }
+      setMessage({ tone: "good", text: `Removed ${result.removed} ${code} chassis.` });
+      router.refresh();
+    });
+  }
+
   const input =
     "focus-ring w-full rounded border border-line bg-surface-2 px-3 py-2 text-sm placeholder:text-muted/50 hover:border-line-hi";
 
@@ -155,6 +174,27 @@ export function FitmentEditor({
     (acc[r.makeName] ??= []).push(r);
     return acc;
   }, {});
+
+  /*
+    Engines actually on this product, for the bulk-remove buttons.
+
+    Built from the rows rather than from the preset list, so the buttons only
+    offer what is really there and the count is exact. Keyed case-insensitively
+    for the same reason the action deletes that way, and the first spelling seen
+    is the one shown.
+  */
+  const engineCounts = rows.reduce<Record<string, { code: string; count: number }>>(
+    (acc, r) => {
+      const code = r.engine?.trim();
+      if (!code) return acc;
+      const key = code.toUpperCase();
+      acc[key] ??= { code, count: 0 };
+      acc[key].count += 1;
+      return acc;
+    },
+    {},
+  );
+  const engineGroups = Object.values(engineCounts).sort((a, b) => a.code.localeCompare(b.code));
 
   return (
     <section className="rounded-card border border-line bg-surface p-5">
@@ -183,6 +223,28 @@ export function FitmentEditor({
           <p className="mt-2 text-xs text-muted">
             Adds every chassis running that engine, using each one&apos;s production years.
           </p>
+
+        </div>
+      )}
+
+      {/* The matching undo, shown only for engines this product actually has.
+          Kept out of the quick-add box above so it still appears on a product
+          whose fitment was imported rather than added with the presets. */}
+      {!readOnly && engineGroups.length > 0 && (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <span className="eyebrow text-[0.6rem] text-muted">Remove by engine</span>
+          {engineGroups.map((g) => (
+            <button
+              key={g.code}
+              type="button"
+              disabled={pending}
+              onClick={() => removePreset(g.code, g.count)}
+              className="focus-ring rounded border border-line px-3 py-1.5 text-xs font-bold text-muted transition-colors hover:border-bad hover:bg-bad hover:text-accent-fg disabled:opacity-50"
+            >
+              Remove {g.code}
+              <span className="ml-1.5 font-normal opacity-70">{g.count}</span>
+            </button>
+          ))}
         </div>
       )}
 

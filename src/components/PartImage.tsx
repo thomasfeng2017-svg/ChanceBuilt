@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { framingStyle, type PhotoFraming } from "@/lib/product-images";
 
 /**
  * Product / department artwork.
@@ -112,6 +113,11 @@ export function PartImage({
   fit = "contain",
   /** Zoom percentage. 100 is no zoom. */
   zoom = 100,
+  /**
+   * Framing for this specific photo. Wins over `fit` and `zoom`, which stay as
+   * the product-wide fallback for photos nobody has cropped by hand.
+   */
+  framing,
 }: {
   /** Top-level category name; picks the placeholder glyph. */
   department: string;
@@ -122,6 +128,7 @@ export function PartImage({
   priority?: boolean;
   fit?: "cover" | "contain";
   zoom?: number;
+  framing?: PhotoFraming;
 }) {
   if (src) {
     const scale = Math.min(3, Math.max(1, zoom / 100));
@@ -133,10 +140,14 @@ export function PartImage({
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           priority={priority}
-          style={{
-            objectFit: fit,
-            ...(scale !== 1 ? { transform: `scale(${scale})` } : {}),
-          }}
+          style={
+            framing
+              ? framingStyle(framing)
+              : {
+                  objectFit: fit,
+                  ...(scale !== 1 ? { transform: `scale(${scale})` } : {}),
+                }
+          }
           className="photo-bw"
         />
       </div>

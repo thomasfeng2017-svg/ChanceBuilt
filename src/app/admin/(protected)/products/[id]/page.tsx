@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser, canWrite } from "@/lib/auth";
 import { productHref } from "@/lib/catalog";
+import { parsePhotoSettings } from "@/lib/product-images";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { FitmentEditor } from "@/components/admin/FitmentEditor";
 
@@ -113,6 +114,7 @@ export default async function EditProductPage({
             images: product.images,
             imageFit: product.imageFit,
             imageZoom: product.imageZoom,
+            imageSettings: parsePhotoSettings(product.imageSettings),
           }}
         />
 

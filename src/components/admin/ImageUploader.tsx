@@ -3,6 +3,13 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { uploadFile } from "@/lib/upload-client";
+import { PhotoFramingEditor } from "./PhotoFramingEditor";
+import {
+  framingFor,
+  framingStyle,
+  type PhotoFraming,
+  type PhotoSettings,
+} from "@/lib/product-images";
 
 /**
  * Multi-image uploader with reordering.
@@ -22,14 +29,40 @@ export function ImageUploader({
   value,
   onChange,
   folder = "products",
+  settings,
+  onSettingsChange,
+  productDefault,
 }: {
   value: string[];
   onChange: (next: string[]) => void;
   folder?: "products" | "gallery" | "hero" | "brand" | "sections";
+  /**
+   * Per-photo crop and zoom, keyed by URL. Optional: the gallery and hero
+   * uploaders have their own framing tools and pass none of this.
+   */
+  settings?: PhotoSettings;
+  onSettingsChange?: (next: PhotoSettings) => void;
+  productDefault?: { fit: "COVER" | "CONTAIN"; zoom: number };
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  /** URL of the photo currently being framed, if any. One at a time. */
+  const [editing, setEditing] = useState<string | null>(null);
+
+  const framingEnabled = !!settings && !!onSettingsChange && !!productDefault;
+
+  function setFraming(url: string, next: PhotoFraming) {
+    onSettingsChange?.({ ...settings, [url]: next });
+  }
+
+  /** Back to the product-level default: drop the entry rather than store a copy. */
+  function resetFraming(url: string) {
+    if (!settings) return;
+    const next = { ...settings };
+    delete next[url];
+    onSettingsChange?.(next);
+  }
 
   /** Index being dragged, and the slot it is hovering over. */
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -55,7 +88,13 @@ export function ImageUploader({
     if (inputRef.current) inputRef.current.value = "";
   }
 
-  const remove = (url: string) => onChange(value.filter((v) => v !== url));
+  function remove(url: string) {
+    onChange(value.filter((v) => v !== url));
+    // Otherwise the framing lingers in the JSON forever, and comes back to life
+    // if the same photo is ever uploaded to the same URL again.
+    if (settings?.[url]) resetFraming(url);
+    if (editing === url) setEditing(null);
+  }
 
   /** Move the photo at `from` so it sits at `to`, keeping the rest in order. */
   function moveTo(from: number, to: number) {
@@ -123,6 +162,7 @@ export function ImageUploader({
         <>
           <p className="mt-4 text-xs text-muted">
             First photo is the main one. Drag to reorder, or use the arrows.
+            {framingEnabled && " Crop lets you zoom and choose what stays in frame."}
           </p>
 
           <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -151,13 +191,29 @@ export function ImageUploader({
                 className={`group relative overflow-hidden rounded border bg-surface-2 transition-opacity ${
                   dragIndex === i ? "opacity-40" : ""
                 } ${
-                  overIndex === i && dragIndex !== null && dragIndex !== i
+                  editing === url
                     ? "border-accent"
-                    : "border-line"
+                    : overIndex === i && dragIndex !== null && dragIndex !== i
+                      ? "border-accent"
+                      : "border-line"
                 }`}
               >
-                <div className="relative aspect-square cursor-grab active:cursor-grabbing">
-                  <Image src={url} alt="" fill sizes="150px" className="object-cover" />
+                {/* The tile is a live preview of the crop, not just a thumbnail:
+                    it is the only place the shop can see what a change did
+                    without saving and loading the storefront. */}
+                <div className="relative aspect-square cursor-grab bg-ink active:cursor-grabbing">
+                  <Image
+                    src={url}
+                    alt=""
+                    fill
+                    sizes="150px"
+                    style={
+                      framingEnabled
+                        ? framingStyle(framingFor(url, settings, productDefault))
+                        : undefined
+                    }
+                    className={framingEnabled ? "" : "object-cover"}
+                  />
                 </div>
 
                 <span
@@ -187,6 +243,18 @@ export function ImageUploader({
                   >
                     →
                   </button>
+                  {framingEnabled && (
+                    <button
+                      type="button"
+                      onClick={() => setEditing(editing === url ? null : url)}
+                      aria-expanded={editing === url}
+                      className={`focus-ring flex-1 py-1.5 font-semibold ${
+                        editing === url ? "text-accent-text" : "text-muted hover:text-text"
+                      }`}
+                    >
+                      Crop
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => remove(url)}
@@ -196,9 +264,29 @@ export function ImageUploader({
                     ✕
                   </button>
                 </div>
+
+                {/* Marks the photos that have been framed by hand, so the shop
+                    can tell at a glance which ones are still on the default. */}
+                {framingEnabled && settings[url] && (
+                  <span className="absolute top-1.5 right-1.5 rounded bg-ink/80 px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-accent-text uppercase">
+                    Cropped
+                  </span>
+                )}
               </li>
             ))}
           </ul>
+
+          {framingEnabled && editing && value.includes(editing) && (
+            <div className="mt-4">
+              <PhotoFramingEditor
+                url={editing}
+                framing={framingFor(editing, settings, productDefault)}
+                onChange={(next) => setFraming(editing, next)}
+                onReset={settings[editing] ? () => resetFraming(editing) : undefined}
+                onDone={() => setEditing(null)}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

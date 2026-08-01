@@ -53,6 +53,7 @@ export default async function NewProductPage() {
           images: [],
           imageFit: "CONTAIN",
           imageZoom: 100,
+          imageSettings: {},
         }}
       />
     </div>

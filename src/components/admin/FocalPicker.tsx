@@ -25,6 +25,8 @@ export function FocalPicker({
   targetAspect,
   poster,
   isVideo = false,
+  zoom = 100,
+  onPointChange,
 }: {
   id: string;
   url: string;
@@ -34,6 +36,21 @@ export function FocalPicker({
   targetAspect: number;
   poster?: string | null;
   isVideo?: boolean;
+  /**
+   * Zoom percentage applied on top of the crop, 100 being none. Without this
+   * the box would claim to be what visitors see while a zoomed photo actually
+   * showed a good deal less.
+   */
+  zoom?: number;
+  /**
+   * Controlled mode. When supplied, the point is reported here instead of
+   * being written straight to the database.
+   *
+   * Product photos need this: they are edited inside the product form, which
+   * saves as a whole, and on a new product there is no row to write to yet.
+   * Site photos have no form around them, so they keep saving on release.
+   */
+  onPointChange?: (x: number, y: number) => void;
 }) {
   const router = useRouter();
   const frameRef = useRef<HTMLDivElement>(null);
@@ -58,8 +75,16 @@ export function FocalPicker({
    * `object-fit: cover` scales to fill, so the longer axis gets clipped.
    */
   const imageAspect = natural ? natural.w / natural.h : targetAspect;
-  const windowW = imageAspect > targetAspect ? targetAspect / imageAspect : 1;
-  const windowH = imageAspect > targetAspect ? 1 : imageAspect / targetAspect;
+  /*
+    Zoom shrinks the window by the same factor on both axes, and around the
+    focal point rather than the middle: the CSS is `transform: scale()` with
+    `transform-origin` pinned to the same point as `object-position`, which
+    leaves the focal point exactly where it was and takes the crop out of the
+    edges. That is why the position maths below is unchanged by zoom.
+  */
+  const scale = Math.min(3, Math.max(1, zoom / 100));
+  const windowW = (imageAspect > targetAspect ? targetAspect / imageAspect : 1) / scale;
+  const windowH = (imageAspect > targetAspect ? 1 : imageAspect / targetAspect) / scale;
 
   // object-position places the window proportionally within the leftover space.
   const windowLeft = (1 - windowW) * (point.x / 100);
@@ -76,13 +101,18 @@ export function FocalPicker({
 
   const save = useCallback(
     (next: { x: number; y: number }) => {
+      // Controlled: hand the point upwards and let the form own persistence.
+      if (onPointChange) {
+        onPointChange(next.x, next.y);
+        return;
+      }
       startTransition(async () => {
         await setFocalPointAction(id, next.x, next.y);
         setSaved(true);
         router.refresh();
       });
     },
-    [id, router],
+    [id, router, onPointChange],
   );
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {

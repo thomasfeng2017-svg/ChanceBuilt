@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireWriter } from "@/lib/auth";
+import { parsePhotoSettings, type PhotoSettings } from "@/lib/product-images";
 
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -57,6 +58,28 @@ export async function saveProductAction(
     .map((s) => s.trim())
     .filter(Boolean);
 
+  /*
+    Per-photo crop, keyed by URL.
+
+    Re-parsed here rather than trusted: this arrives as a JSON string in a
+    hidden field, so it is as forgeable as any other form value, and it lands in
+    a style attribute. parsePhotoSettings clamps every number and drops anything
+    it does not recognise.
+
+    Entries for photos that are no longer attached are dropped too. The uploader
+    already does this on remove, but a stale row from before this field existed
+    would otherwise keep its orphans forever.
+  */
+  let imageSettings: PhotoSettings = {};
+  try {
+    imageSettings = parsePhotoSettings(JSON.parse(String(formData.get("imageSettings") ?? "{}")));
+  } catch {
+    imageSettings = {};
+  }
+  for (const url of Object.keys(imageSettings)) {
+    if (!images.includes(url)) delete imageSettings[url];
+  }
+
   if (name.length < 3) return { ok: false, error: "Give the product a name." };
   if (!sku) return { ok: false, error: "SKU is required — it's how fitment imports match." };
   if (!brandId) return { ok: false, error: "Pick a brand." };
@@ -95,6 +118,7 @@ export async function saveProductAction(
     archived,
     imageFit,
     imageZoom,
+    imageSettings,
     brandId,
     categoryId,
   };
@@ -222,6 +246,38 @@ export async function addFitmentByEngineAction(productId: string, engineCode: st
 
   revalidatePath(`/admin/products/${productId}`);
   return { ok: true as const, added: toCreate.length };
+}
+
+/**
+ * Undo for the engine presets.
+ *
+ * "All B58" adds a dozen or more chassis in one click, and clicking the wrong
+ * code is easy when the buttons sit next to each other. Without this, undoing it
+ * means fourteen individual Remove clicks.
+ *
+ * Matched on the engine recorded ON THE FITMENT, not on the chassis's engine
+ * list. Plenty of BMW chassis were sold with more than one engine, so going by
+ * the chassis would sweep away rows that were added deliberately for a different
+ * engine and merely share a car.
+ */
+export async function removeFitmentByEngineAction(productId: string, engineCode: string) {
+  await requireWriter("STAFF");
+
+  const code = engineCode.trim();
+  if (!code) return { ok: false as const, error: "No engine given." };
+
+  const { count } = await prisma.fitment.deleteMany({
+    // Case-insensitive: the presets write "B58" but a typed-in row could be
+    // "b58", and the shop would rightly expect one button to clear both.
+    where: { productId, engine: { equals: code, mode: "insensitive" } },
+  });
+
+  if (count === 0) {
+    return { ok: false as const, error: `No ${code} fitment to remove.` };
+  }
+
+  revalidatePath(`/admin/products/${productId}`);
+  return { ok: true as const, removed: count };
 }
 
 export async function removeFitmentAction(fitmentId: string, productId: string) {

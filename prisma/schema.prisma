@@ -286,6 +286,23 @@ model Product {
   /// Zoom percentage applied to product photos. 100 is no zoom.
   imageZoom Int      @default(100)
 
+  /**
+   * Per-photo framing overrides, keyed by image URL:
+   *
+   *   { "/products/turbo.webp": { "x": 40, "y": 70, "zoom": 160, "fit": "COVER" } }
+   *
+   * The product-level imageFit and imageZoom above remain the default for any
+   * photo without an entry here, so nothing has to be set twice and existing
+   * products keep the framing they already had.
+   *
+   * Keyed by URL rather than by index because the shop can reorder photos, and
+   * an index-based map would silently reassign every crop the moment the main
+   * photo changed. It is JSON rather than a ProductImage table because photos
+   * are edited as part of the product form, before the product may even exist,
+   * and a relation would need rows saved ahead of the product itself.
+   */
+  imageSettings Json?
+
   // True for parts that fit any vehicle (oil, tools, cleaners, floor mats).
   // Universal parts bypass fitment matching entirely.
   isUniversal Boolean @default(false)

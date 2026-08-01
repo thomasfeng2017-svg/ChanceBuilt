@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatCents } from "@/lib/money";
 import { departmentOf, productHref, type CatalogProduct } from "@/lib/catalog";
 import { PartImage } from "./PartImage";
+import { productFraming } from "@/lib/product-images";
 
 /**
  * Catalog tile.
@@ -37,8 +38,9 @@ export function ProductCard({
           department={departmentOf(product)}
           src={product.images[0] ?? null}
           alt={`${product.brand.name} ${product.name}`}
-          fit={product.imageFit === "COVER" ? "cover" : "contain"}
-          zoom={product.imageZoom}
+          framing={
+            product.images[0] ? productFraming(product, product.images[0]) : undefined
+          }
           className={`h-full w-full transition-opacity duration-500 ${
             secondary ? "group-hover:opacity-0" : ""
           }`}
@@ -50,8 +52,7 @@ export function ProductCard({
             department={departmentOf(product)}
             src={secondary}
             alt=""
-            fit={product.imageFit === "COVER" ? "cover" : "contain"}
-            zoom={product.imageZoom}
+            framing={productFraming(product, secondary)}
             className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           />
         )}

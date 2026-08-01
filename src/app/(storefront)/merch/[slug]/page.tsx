@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { formatCents } from "@/lib/money";
 import { departmentOf } from "@/lib/catalog";
 import { PartImage } from "@/components/PartImage";
+import { productFraming } from "@/lib/product-images";
 import { AddToCart } from "@/components/AddToCart";
 
 async function getProduct(slug: string) {
@@ -75,8 +76,9 @@ export default async function MerchProductPage({
             src={product.images[0] ?? null}
             alt={product.name}
             priority
-            fit={product.imageFit === "COVER" ? "cover" : "contain"}
-            zoom={product.imageZoom}
+            framing={
+              product.images[0] ? productFraming(product, product.images[0]) : undefined
+            }
             /* Capped on small screens so the buy panel is not a full scroll
                below the photo. Matches the parts page. */
             className="aspect-4/3 max-h-[24rem] w-full rounded-card border border-line lg:aspect-square lg:max-h-none"
@@ -90,8 +92,7 @@ export default async function MerchProductPage({
                   department={department}
                   src={img}
                   alt={product.name}
-                  fit={product.imageFit === "COVER" ? "cover" : "contain"}
-                  zoom={product.imageZoom}
+                  framing={productFraming(product, img)}
                   className="aspect-square w-full rounded border border-line"
                 />
               ))}

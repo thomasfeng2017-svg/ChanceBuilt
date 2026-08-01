@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { saveProductAction, type ProductFormState } from "@/app/admin/(protected)/products/actions";
 import { ImageUploader } from "./ImageUploader";
+import type { PhotoSettings } from "@/lib/product-images";
 
 type Option = { id: string; name: string; group?: string | null };
 type CategoryOption = Option & { kind: "PART" | "MERCH" };
@@ -25,6 +26,8 @@ export type ProductFormValues = {
   images: string[];
   imageFit: "COVER" | "CONTAIN";
   imageZoom: number;
+  /** Per-photo crop and zoom, keyed by image URL. */
+  imageSettings: PhotoSettings;
 };
 
 function SubmitButton({ isNew }: { isNew: boolean }) {
@@ -59,6 +62,7 @@ export function ProductForm({
   const [categoryId, setCategoryId] = useState(initial.categoryId);
   const [imageFit, setImageFit] = useState<"COVER" | "CONTAIN">(initial.imageFit);
   const [imageZoom, setImageZoom] = useState(initial.imageZoom);
+  const [imageSettings, setImageSettings] = useState<PhotoSettings>(initial.imageSettings);
   const isNew = !initial.id;
 
   // Category decides which shop the product appears in. Merch has no fitment,
@@ -74,6 +78,7 @@ export function ProductForm({
     <form action={formAction} className="space-y-8">
       {initial.id && <input type="hidden" name="id" value={initial.id} />}
       <input type="hidden" name="images" value={images.join(",")} />
+      <input type="hidden" name="imageSettings" value={JSON.stringify(imageSettings)} />
 
       {/* --- basics --- */}
       <section className="rounded-card border border-line bg-surface p-5">
@@ -239,7 +244,14 @@ export function ProductForm({
         {readOnly ? (
           <p className="text-sm text-muted">{images.length} photo(s)</p>
         ) : (
-          <ImageUploader value={images} onChange={setImages} folder="products" />
+          <ImageUploader
+            value={images}
+            onChange={setImages}
+            folder="products"
+            settings={imageSettings}
+            onSettingsChange={setImageSettings}
+            productDefault={{ fit: imageFit, zoom: imageZoom }}
+          />
         )}
 
         {/*
@@ -255,7 +267,7 @@ export function ProductForm({
         {!readOnly && images.length > 0 && (
           <div className="mt-5 space-y-3 border-t border-line pt-4">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-sm font-semibold">Photo framing</span>
+              <span className="mr-1 text-sm font-semibold">Default framing</span>
               {(
                 [
                   ["CONTAIN", "Show whole photo"],
@@ -302,6 +314,11 @@ export function ProductForm({
             {imageFit !== "COVER" && (
               <input type="hidden" name="imageZoom" value={imageZoom} />
             )}
+
+            <p className="text-xs text-muted">
+              Applies to every photo that has not been cropped on its own. Use
+              Crop on a photo to override it there.
+            </p>
           </div>
         )}
       </section>
