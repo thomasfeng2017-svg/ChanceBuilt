@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { clearVehicleAction } from "@/app/actions";
+import { clearVehicleAction, hideGarageBarAction } from "@/app/actions";
 import { YmmSelector } from "./YmmSelector";
 import { vehicleLabel, type Vehicle } from "@/lib/vehicle";
 
@@ -12,12 +12,34 @@ import { vehicleLabel, type Vehicle } from "@/lib/vehicle";
  * Visible on every page. When no vehicle is set it nags (politely) with the
  * selector inline, because an un-filtered auto parts catalog is close to
  * useless to a customer.
+ *
+ * It can be closed, because not everyone arriving is shopping for a specific
+ * car: some are reading about the shop or buying a hoodie, and a bar asking for
+ * a chassis code on every page is in the way. Closing is remembered in a cookie
+ * and hides the bar sitewide.
+ *
+ * Closing does not touch the vehicle or the fitment filter. That would be a
+ * surprising thing for a close button to do, and the parts page states which
+ * vehicle is filtering in its own subheading, so nothing is hidden by hiding
+ * this.
  */
-export function GarageBar({ vehicle }: { vehicle: Vehicle | null }) {
+export function GarageBar({
+  vehicle,
+  hidden = false,
+}: {
+  vehicle: Vehicle | null;
+  hidden?: boolean;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  const hide = () =>
+    startTransition(async () => {
+      await hideGarageBarAction();
+      router.refresh();
+    });
 
   // Merch is not filtered by vehicle, so claiming a fitment filter is on would
   // be a lie, and nagging someone to pick a car before buying a hat is worse.
@@ -27,6 +49,10 @@ export function GarageBar({ vehicle }: { vehicle: Vehicle | null }) {
   // prompt here as well means two identical selectors stacked on top of each
   // other. Once a vehicle is chosen the compact bar is useful everywhere.
   if (!vehicle && (pathname === "/" || !fitmentApplies)) return null;
+
+  // Closed by the customer. `editing` beats it, so re-opening the picker from
+  // elsewhere still works even once the bar has been dismissed.
+  if (hidden && !editing) return null;
 
   if (!vehicle || editing) {
     return (
@@ -45,13 +71,22 @@ export function GarageBar({ vehicle }: { vehicle: Vehicle | null }) {
                 redirectTo="/parts"
               />
             </div>
-            {vehicle && (
+            {vehicle ? (
               <button
                 type="button"
                 onClick={() => setEditing(false)}
                 className="focus-ring shrink-0 self-start rounded-lg px-3 py-2 text-sm text-muted hover:text-text lg:self-auto"
               >
                 Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={hide}
+                className="focus-ring shrink-0 self-start rounded-lg px-3 py-2 text-sm text-muted hover:text-text disabled:opacity-50 lg:self-auto"
+              >
+                Not now
               </button>
             )}
           </div>
@@ -101,6 +136,18 @@ export function GarageBar({ vehicle }: { vehicle: Vehicle | null }) {
             className="focus-ring rounded-md px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-text disabled:opacity-50"
           >
             Clear
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={hide}
+            aria-label="Hide the garage bar"
+            title="Hide this bar"
+            className="focus-ring ml-1 rounded-md p-1.5 text-muted transition-colors hover:bg-surface-2 hover:text-text disabled:opacity-50"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
           </button>
         </div>
       </div>

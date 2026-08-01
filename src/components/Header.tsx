@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getVehicle } from "@/lib/garage";
+import { getVehicle, garageBarHidden } from "@/lib/garage";
 import { getCartCount } from "@/lib/cart";
 import { GarageBar } from "./GarageBar";
 import { SearchBox } from "./SearchBox";
@@ -16,7 +16,11 @@ const NAV = [
 ];
 
 export async function Header() {
-  const [vehicle, cartCount] = await Promise.all([getVehicle(), getCartCount()]);
+  const [vehicle, cartCount, barHidden] = await Promise.all([
+    getVehicle(),
+    getCartCount(),
+    garageBarHidden(),
+  ]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ink/95 backdrop-blur supports-[backdrop-filter]:bg-ink/85">
@@ -98,7 +102,7 @@ export async function Header() {
         </ul>
       </nav>
 
-      <GarageBar vehicle={vehicle} />
+      <GarageBar vehicle={vehicle} hidden={barHidden} />
     </header>
   );
 }

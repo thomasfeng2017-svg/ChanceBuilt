@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import {
   GARAGE_COOKIE,
+  GARAGE_BAR_COOKIE,
   GARAGE_MAX_AGE,
   getVehicle,
   vehicleLabel,
@@ -61,12 +62,19 @@ export async function setVehicleAction(input: {
     chassis: model.chassis,
   };
 
-  (await cookies()).set(GARAGE_COOKIE, JSON.stringify(vehicle), {
+  const jar = await cookies();
+  jar.set(GARAGE_COOKIE, JSON.stringify(vehicle), {
     maxAge: GARAGE_MAX_AGE,
     httpOnly: false, // read by the client selector to pre-fill its dropdowns
     sameSite: "lax",
     path: "/",
   });
+
+  // Picking a car brings the bar back if it had been closed. Someone who chose
+  // a vehicle wants to see what the catalog is filtered to, and this is the way
+  // back for anyone who closed the bar and later changed their mind: there is
+  // no other control that restores it.
+  jar.delete(GARAGE_BAR_COOKIE);
 
   revalidatePath("/", "layout");
 
@@ -78,6 +86,25 @@ export async function clearVehicleAction() {
   (await cookies()).delete(GARAGE_COOKIE);
   revalidatePath("/", "layout");
 }
+
+/**
+ * Close the garage bar, for someone who just wants to browse.
+ *
+ * Kept separate from the vehicle itself: closing the bar hides a piece of
+ * chrome, it does not change what the catalog shows. Someone who has picked a
+ * car and then closes the bar is still shopping for that car, and the parts page
+ * says so in its own subheading either way.
+ */
+export async function hideGarageBarAction() {
+  (await cookies()).set(GARAGE_BAR_COOKIE, "1", {
+    maxAge: GARAGE_MAX_AGE,
+    httpOnly: false,
+    sameSite: "lax",
+    path: "/",
+  });
+  revalidatePath("/", "layout");
+}
+
 
 // ------------------------------------------------------------------- cart --
 

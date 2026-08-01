@@ -20,6 +20,14 @@ export type Vehicle = {
 export const GARAGE_COOKIE = "garage";
 export const GARAGE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
+/**
+ * Set when the customer has closed the garage bar.
+ *
+ * A cookie rather than localStorage so the bar can be left out during server
+ * rendering. Kept in state the client can read too, hence not httpOnly.
+ */
+export const GARAGE_BAR_COOKIE = "garage_bar_hidden";
+
 export function vehicleLabel(v: Vehicle): string {
   return `${v.year} ${v.makeName} ${v.modelName}${v.chassis ? ` (${v.chassis})` : ""}`;
 }
