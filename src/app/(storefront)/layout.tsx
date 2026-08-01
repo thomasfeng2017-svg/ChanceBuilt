@@ -42,7 +42,15 @@ const jsonLd = {
       closes: "18:00",
     },
   ],
-  sameAs: [SITE.social.instagram, SITE.social.youtube, SITE.social.tiktok],
+  // Filtered: an empty string in sameAs is a structured-data error, and an
+  // unconfirmed account should not be claimed to search engines at all.
+  sameAs: [
+    SITE.social.instagram,
+    SITE.social.youtube,
+    SITE.social.tiktok,
+    SITE.social.yelp,
+    SITE.social.google,
+  ].filter(Boolean),
 };
 
 export default function StorefrontLayout({
@@ -103,7 +111,10 @@ export default function StorefrontLayout({
                 { label: "Instagram", short: "IG", href: SITE.social.instagram },
                 { label: "YouTube", short: "YT", href: SITE.social.youtube },
                 { label: "TikTok", short: "TT", href: SITE.social.tiktok },
-              ].map((s) => (
+              ]
+                // Unset accounts are dropped rather than rendered as dead links.
+                .filter((s): s is { label: string; short: string; href: string } => !!s.href)
+                .map((s) => (
                 <a
                   key={s.short}
                   href={s.href}

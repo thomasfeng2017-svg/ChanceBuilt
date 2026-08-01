@@ -89,7 +89,10 @@ export default async function ContactPage() {
           { label: "Instagram", href: SITE.social.instagram },
           { label: "YouTube", href: SITE.social.youtube },
           { label: "TikTok", href: SITE.social.tiktok },
-        ].map((s) => (
+        ]
+          // Unset accounts are dropped rather than shown as dead links.
+          .filter((s): s is { label: string; href: string } => !!s.href)
+          .map((s) => (
           <a
             key={s.label}
             href={s.href}

@@ -23,7 +23,18 @@ export type SiteDetails = {
   phoneHref: string;
   email: string;
   address: { street: string; city: string; state: string; zip: string };
-  social: { instagram: string; youtube: string; tiktok: string; yelp?: string; google?: string };
+  /**
+   * Only Instagram was ever confirmed. Anything left empty is not rendered,
+   * rather than shipping a link that 404s: a dead social icon in the footer
+   * reads worse than an absent one. Fill these in as they are confirmed.
+   */
+  social: {
+    instagram?: string;
+    youtube?: string;
+    tiktok?: string;
+    yelp?: string;
+    google?: string;
+  };
   hours: ShopHours;
   platforms: ReadonlyArray<{
     code: string;
@@ -56,8 +67,9 @@ export const SITE: SiteDetails = {
 
   social: {
     instagram: "https://www.instagram.com/chancebuiltllc/",
-    youtube: "https://www.youtube.com/@chancebuiltllc",
-    tiktok: "https://www.tiktok.com/@chancebuiltllc",
+    // Unconfirmed: both @chancebuiltllc and @chancebuiltperformance 404.
+    youtube: "",
+    tiktok: "https://www.tiktok.com/@chancebuiltperformance",
   },
 
   /**
