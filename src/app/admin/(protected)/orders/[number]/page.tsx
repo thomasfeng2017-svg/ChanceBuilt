@@ -62,7 +62,7 @@ export default async function OrderDetailPage({
 
       {order.status === "PENDING" && (
         <p className="mb-6 rounded border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-          No payment has been taken for this order — checkout doesn&apos;t charge yet. Mark it
+          No payment has been taken for this order. Checkout doesn&apos;t charge yet. Mark it
           paid only once you&apos;ve collected the money another way.
         </p>
       )}

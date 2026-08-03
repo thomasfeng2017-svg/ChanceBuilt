@@ -81,7 +81,7 @@ export async function saveProductAction(
   }
 
   if (name.length < 3) return { ok: false, error: "Give the product a name." };
-  if (!sku) return { ok: false, error: "SKU is required — it's how fitment imports match." };
+  if (!sku) return { ok: false, error: "SKU is required. It's how fitment imports match." };
   if (!brandId) return { ok: false, error: "Pick a brand." };
   if (!categoryId) return { ok: false, error: "Pick a category." };
   if (priceCents === null) return { ok: false, error: "Enter a valid price." };

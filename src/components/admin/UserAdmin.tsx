@@ -222,8 +222,8 @@ export function UserAdmin({ actorId, users }: { actorId: string; users: Row[] })
           <label className="block">
             <span className="mb-1.5 block text-sm font-semibold">Role</span>
             <select name="role" defaultValue="STAFF" className={`select-field ${input}`}>
-              <option value="OWNER">Owner — everything, including users</option>
-              <option value="STAFF">Staff — catalog, orders, appointments</option>
+              <option value="OWNER">Owner: everything, including users</option>
+              <option value="STAFF">Staff: catalog, orders, appointments</option>
               <option value="VIEWER">Read only</option>
             </select>
           </label>

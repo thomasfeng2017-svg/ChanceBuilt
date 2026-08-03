@@ -38,7 +38,7 @@ export function VehicleDetailsForm({
           name="notes"
           rows={3}
           defaultValue={notes}
-          placeholder="Anything worth remembering: plate, colour, what it's built for."
+          placeholder="Anything worth remembering: plate, color, what it's built for."
           className={input}
         />
       </label>

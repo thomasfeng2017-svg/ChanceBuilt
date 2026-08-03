@@ -16,7 +16,7 @@ const CATEGORIES = [
   "Drivetrain",
   "Suspension",
   "Brakes",
-  "Wheels & Tyres",
+  "Wheels & Tires",
   "Interior",
   "Exterior",
 ];

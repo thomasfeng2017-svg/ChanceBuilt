@@ -94,7 +94,7 @@ export default async function AdminDashboard({
           <Link href="/admin/products?filter=out-of-stock" className="focus-ring rounded font-semibold text-text underline underline-offset-2">
             {outOfStock} product{outOfStock === 1 ? " is" : "s are"} out of stock
           </Link>{" "}
-          — customers can still see them but can&apos;t buy.
+          and customers can still see them but can&apos;t buy.
         </p>
       )}
 

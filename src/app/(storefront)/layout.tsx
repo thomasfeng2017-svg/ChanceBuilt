@@ -207,8 +207,21 @@ export default function StorefrontLayout({
         </div>
 
         <div className="border-t border-line/60 py-5 text-center text-xs text-muted">
-          © {new Date().getFullYear()}{" "}
-          {SITE.legalName}. Riverside, California.
+          <p>
+            © {new Date().getFullYear()}{" "}
+            {SITE.legalName}. Riverside, California.
+          </p>
+          {/* Policy pages live here and only here. They earn a nav slot the day
+              a customer actually asks for them; until then the footer is where
+              everyone expects to find the fine print. */}
+          <p className="mt-1.5 flex justify-center gap-x-4">
+            <Link href="/returns" className="focus-ring rounded hover:text-text">
+              Returns &amp; Warranty
+            </Link>
+            <Link href="/privacy" className="focus-ring rounded hover:text-text">
+              Privacy
+            </Link>
+          </p>
         </div>
       </footer>
     </>

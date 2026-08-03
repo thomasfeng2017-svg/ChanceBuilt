@@ -22,12 +22,12 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE.name} — ${SITE.tagline} | Riverside, CA`,
+    default: `${SITE.name} · ${SITE.tagline} | Riverside, CA`,
     template: `%s · ${SITE.shortName}`,
   },
   description: SITE.description,
   openGraph: {
-    title: `${SITE.name} — ${SITE.tagline}`,
+    title: `${SITE.name} · ${SITE.tagline}`,
     description: SITE.description,
     type: "website",
     locale: "en_US",

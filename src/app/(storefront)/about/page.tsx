@@ -8,7 +8,7 @@ import { SITE, HOURS_LABEL } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "ChanceBuilt Performance is a BMW-focused performance shop in Riverside, California specialising in turbocharged platforms.",
+    "ChanceBuilt Performance is a BMW-focused performance shop in Riverside, California specializing in turbocharged platforms.",
 };
 
 export default async function AboutPage() {

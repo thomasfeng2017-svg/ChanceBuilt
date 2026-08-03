@@ -93,7 +93,7 @@ export function ProductForm({
               disabled={readOnly}
               defaultValue={initial.name}
               className={input}
-              placeholder="Pure Turbos Stage 2 Upgrade — S55"
+              placeholder="Pure Turbos Stage 2 Upgrade - S55"
             />
           </label>
 

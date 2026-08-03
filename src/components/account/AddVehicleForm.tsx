@@ -126,7 +126,7 @@ export function AddVehicleForm() {
 
       <input
         name="nickname"
-        placeholder="Nickname (optional) — the daily, track car…"
+        placeholder="Nickname (optional): the daily, track car…"
         className="focus-ring w-full rounded border border-line bg-surface-2 px-3.5 py-3 text-sm placeholder:text-muted/50 hover:border-line-hi"
       />
 

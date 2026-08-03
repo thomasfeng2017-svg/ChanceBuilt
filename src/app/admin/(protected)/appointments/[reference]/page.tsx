@@ -57,7 +57,7 @@ export default async function AppointmentDetailPage({
 
       {appointment.status === "REQUESTED" && (
         <p className="mb-6 rounded border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-          Not confirmed yet — the customer is expecting a call or email back.
+          Not confirmed yet. The customer is expecting a call or email back.
         </p>
       )}
 
