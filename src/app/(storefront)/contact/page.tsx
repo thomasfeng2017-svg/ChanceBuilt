@@ -26,7 +26,7 @@ export default async function ContactPage() {
       <SectionPhoto
         slot="section:contact-shop"
         alt="ChanceBuilt Performance, Riverside California"
-        className="mt-8 aspect-16/9 w-full rounded-card border border-line"
+        className="mt-8 aspect-4/3 w-full rounded-card border border-line"
         sizes="(max-width: 896px) 100vw, 56rem"
         priority
       />

@@ -26,7 +26,7 @@ export default async function AboutPage() {
       <SectionPhoto
         slot="section:about-shop"
         alt="Inside the ChanceBuilt Performance shop in Riverside, California"
-        className="mt-8 aspect-16/9 w-full rounded-card border border-line"
+        className="mt-8 aspect-4/3 w-full rounded-card border border-line"
         sizes="(max-width: 896px) 100vw, 56rem"
         priority
       />
@@ -49,7 +49,7 @@ export default async function AboutPage() {
       <SectionPhoto
         slot="section:about-bays"
         alt="Cars on the lifts at ChanceBuilt Performance"
-        className="mt-12 aspect-16/9 w-full rounded-card border border-line"
+        className="mt-12 aspect-4/3 w-full rounded-card border border-line"
         sizes="(max-width: 896px) 100vw, 56rem"
       />
 

@@ -188,13 +188,16 @@ export default async function HomePage() {
           band does more for that than any amount of extra padding. */}
       <section className="section-paper border-y border-line">
         <div className="mx-auto grid max-w-7xl items-stretch gap-0 lg:grid-cols-2">
-          {/* 4:3 below the split, matching the photo's own shape, so a phone
-              sees the whole frame. A fixed 18rem height at full width was a
-              3.3:1 letterbox that threw away 59% of the picture. */}
+          {/* 4:3 below the split, matching both the photo's own shape and the
+              ratio this slot is declared as in image-slots.ts, so the crop the
+              admin previews is the crop that ships. A fixed 18rem height at full
+              width was a 3.3:1 letterbox that threw away 59% of the picture, and
+              an intermediate 16:9 step reintroduced the same problem in
+              miniature between the sm and lg breakpoints. */}
           <SectionPhoto
             slot="section:service-tuning"
             alt="Custom tuning session in progress at ChanceBuilt Performance"
-            className="aspect-4/3 sm:aspect-16/9 lg:aspect-auto lg:min-h-[30rem]"
+            className="aspect-4/3 lg:aspect-auto lg:min-h-[30rem]"
             sizes="(max-width: 1024px) 100vw, 50vw"
           />
           <div className="flex flex-col justify-center px-4 py-14 sm:px-8 lg:px-14">
