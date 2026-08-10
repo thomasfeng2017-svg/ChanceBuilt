@@ -398,9 +398,11 @@ body::after {
     transition-duration: 0.01ms !important;
   }
 
-  /* A full-bleed moving background is precisely what this setting is for.
-     Hiding the video reveals the poster frame underneath it. */
-  .hero-video {
+  /* A moving background is precisely what this setting is for. Hiding the
+     video reveals the poster frame underneath it. Covers the hero and every
+     section slot, since both render the same poster-then-video pair. */
+  .hero-video,
+  .section-video {
     display: none;
   }
 }

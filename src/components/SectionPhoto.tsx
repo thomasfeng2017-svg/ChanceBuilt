@@ -2,7 +2,7 @@ import Image from "next/image";
 import { getSiteImage } from "@/lib/site-images";
 
 /**
- * A named photo slot used through the site.
+ * A named media slot used through the site. Photo or video.
  *
  * Renders nothing when the slot is empty, so every page degrades to a clean
  * text layout rather than a broken image box. Photos get the shop's
@@ -12,6 +12,11 @@ import { getSiteImage } from "@/lib/site-images";
  * The focal point set in the admin is applied as `object-position`, which is
  * what lets one upload work in a wide banner and a square tile without
  * re-cropping the file.
+ *
+ * Video matters here because the admin's upload control has always accepted
+ * mp4 for every slot, not just the hero. Before this, dropping a video on a
+ * section slot handed the .mp4 to next/image and produced a blank panel on the
+ * live site, with nothing in the admin hinting at why.
  */
 export async function SectionPhoto({
   slot,
@@ -47,36 +52,71 @@ export async function SectionPhoto({
   */
   const positioned = /\b(absolute|fixed|sticky)\b/.test(className);
 
+  /*
+    Zoom is a transform rather than a different crop, so it is applied on top of
+    whichever fit was chosen and never touches the stored file.
+
+    transform-origin is pinned to the same point as object-position, so zooming
+    in closes in on the part the shop picked instead of drifting away from it
+    towards the middle.
+  */
+  const frame: React.CSSProperties = {
+    objectFit: image.objectFit,
+    objectPosition: image.objectPosition,
+    ...(image.scale !== 1
+      ? { transform: `scale(${image.scale})`, transformOrigin: image.objectPosition }
+      : {}),
+  };
+
   return (
     <div
       className={`${positioned ? "" : "relative"} overflow-hidden bg-surface-2 ${className}`}
     >
-      <Image
-        src={image.url}
-        alt={image.alt || alt}
-        fill
-        sizes={sizes}
-        priority={priority}
-        /*
-          Zoom is a transform rather than a different crop, so it is applied on
-          top of whichever fit was chosen and never touches the stored file.
-
-          transform-origin is pinned to the same point as object-position, so
-          zooming in closes in on the part the shop picked instead of drifting
-          away from it towards the middle.
-        */
-        style={{
-          objectFit: image.objectFit,
-          objectPosition: image.objectPosition,
-          ...(image.scale !== 1
-            ? {
-                transform: `scale(${image.scale})`,
-                transformOrigin: image.objectPosition,
-              }
-            : {}),
-        }}
-        className={`photo-bw ${imageClassName}`}
-      />
+      {image.isVideo ? (
+        <>
+          {/*
+            Poster underneath rather than only as the video's own poster
+            attribute. It is what shows for anyone who asked for reduced
+            motion, since the CSS hides the video itself for them, and it also
+            covers autoplay being blocked or the file still loading.
+          */}
+          {image.posterUrl && (
+            <Image
+              src={image.posterUrl}
+              alt={image.alt || alt}
+              fill
+              sizes={sizes}
+              priority={priority}
+              style={frame}
+              className={`photo-bw ${imageClassName}`}
+            />
+          )}
+          <video
+            src={image.url}
+            poster={image.posterUrl ?? undefined}
+            // Muted, looped and inline is the only combination browsers will
+            // autoplay. preload="metadata" keeps it off the critical path.
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            style={frame}
+            className={`section-video photo-bw absolute inset-0 h-full w-full ${imageClassName}`}
+          />
+        </>
+      ) : (
+        <Image
+          src={image.url}
+          alt={image.alt || alt}
+          fill
+          sizes={sizes}
+          priority={priority}
+          style={frame}
+          className={`photo-bw ${imageClassName}`}
+        />
+      )}
       {scrim && (
         <div
           aria-hidden="true"
