@@ -75,8 +75,8 @@ hoodie and tee?
 
 ## 6. Quick answers (two minutes)
 
-- Instagram says Corona, Yelp says Riverside. The site says 12510 Magnolia Ave,
-  Riverside. Which is right?
+- Your Instagram bio says Corona but the shop address is Riverside. Which should
+  the site show for people trying to find you?
 - Hours on the site: Mon-Fri 10-6, Sat 11-6, Sun closed. Correct?
 - Any dates you're closed this year (holidays, SEMA, race weekends)? The booking
   calendar can block them.

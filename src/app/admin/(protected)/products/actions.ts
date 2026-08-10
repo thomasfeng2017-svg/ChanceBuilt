@@ -21,11 +21,40 @@ function toCents(input: string): number | null {
 export type ProductFormState = { ok: boolean; error?: string; id?: string } | null;
 
 /**
+ * The next free CB-#### code.
+ *
+ * The shop does not keep SKUs of its own, so asking for one was asking someone
+ * to invent an identifier they have no use for and would enter inconsistently.
+ * The system still wants a stable short code: it goes on invoices, packing
+ * slips, order emails and the Stripe line item, and it is what somebody reads
+ * down the phone when a customer asks about a part.
+ *
+ * Sorted numerically rather than by string. Lexicographic ordering puts
+ * "CB-9999" above "CB-10000", which would silently start handing out duplicates
+ * at the four-to-five digit boundary. The catalog is small enough that pulling
+ * the codes and taking the max is cheap and obviously correct.
+ */
+async function nextGeneratedSku(): Promise<string> {
+  const rows = await prisma.product.findMany({
+    where: { sku: { startsWith: "CB-" } },
+    select: { sku: true },
+  });
+
+  let highest = 1000;
+  for (const { sku } of rows) {
+    const n = Number.parseInt(sku.slice(3), 10);
+    if (Number.isFinite(n) && n > highest) highest = n;
+  }
+  return `CB-${highest + 1}`;
+}
+
+/**
  * Create or update a product.
  *
- * The SKU is the stable identifier used by the fitment importer, so it's
- * required and must be unique. The slug is derived once on create and then left
- * alone — changing it later would break any link a customer has saved.
+ * The SKU is the stable identifier used by the fitment importer and by every
+ * order record, so it must be unique. It is generated when left blank. The slug
+ * is derived once on create and then left alone, since changing it later would
+ * break any link a customer has saved.
  */
 export async function saveProductAction(
   _prev: ProductFormState,
@@ -81,7 +110,6 @@ export async function saveProductAction(
   }
 
   if (name.length < 3) return { ok: false, error: "Give the product a name." };
-  if (!sku) return { ok: false, error: "SKU is required. It's how fitment imports match." };
   if (!brandId) return { ok: false, error: "Pick a brand." };
   if (!categoryId) return { ok: false, error: "Pick a category." };
   if (priceCents === null) return { ok: false, error: "Enter a valid price." };
@@ -98,16 +126,36 @@ export async function saveProductAction(
     return { ok: false, error: "Stock must be a whole number." };
   }
 
-  // SKU uniqueness, excluding the row being edited.
+  /*
+    Work out the code.
+
+    Blank on an edit keeps whatever the product already has: a SKU that appears
+    on past invoices and order emails must not change because someone cleared a
+    field. Blank on a new product gets a generated one.
+  */
+  let finalSku = sku;
+  if (!finalSku && id) {
+    const current = await prisma.product.findUnique({
+      where: { id },
+      select: { sku: true },
+    });
+    finalSku = current?.sku ?? "";
+  }
+  if (!finalSku) finalSku = await nextGeneratedSku();
+
+  // Uniqueness, excluding the row being edited. Only reported as an error when
+  // the code was typed in; a generated collision is retried below instead.
   const clash = await prisma.product.findFirst({
-    where: { sku, ...(id ? { NOT: { id } } : {}) },
+    where: { sku: finalSku, ...(id ? { NOT: { id } } : {}) },
     select: { id: true },
   });
-  if (clash) return { ok: false, error: `SKU ${sku} is already used by another product.` };
+  if (clash && sku) {
+    return { ok: false, error: `SKU ${finalSku} is already used by another product.` };
+  }
 
   const data = {
     name,
-    sku,
+    sku: finalSku,
     partNumber: partNumber || null,
     description,
     priceCents,
@@ -130,10 +178,38 @@ export async function saveProductAction(
     return { ok: true, id };
   }
 
-  // Slug must be unique; suffix with the SKU, which already is.
-  const created = await prisma.product.create({
-    data: { ...data, slug: `${slugify(name)}-${sku.toLowerCase()}` },
-  });
+  /*
+    Create, retrying if a generated code was taken in the meantime.
+
+    Two people adding products at the same moment both read the same highest
+    number and both try to claim it. The unique index is what actually decides,
+    so the loser recomputes and tries again rather than showing a stranger an
+    error about a code they never typed. A typed-in SKU is not retried: that
+    clash was already reported above.
+  */
+  let created: { id: string } | null = null;
+  for (let attempt = 0; attempt < 5 && !created; attempt++) {
+    const candidate = attempt === 0 ? finalSku : await nextGeneratedSku();
+    try {
+      // Slug must be unique; suffix with the SKU, which already is.
+      created = await prisma.product.create({
+        data: {
+          ...data,
+          sku: candidate,
+          slug: `${slugify(name)}-${candidate.toLowerCase()}`,
+        },
+        select: { id: true },
+      });
+    } catch (e) {
+      const isDuplicate =
+        typeof e === "object" && e !== null && (e as { code?: string }).code === "P2002";
+      if (!isDuplicate || sku) throw e;
+    }
+  }
+
+  if (!created) {
+    return { ok: false, error: "Couldn't allocate a product code. Please try again." };
+  }
 
   revalidatePath("/admin/products");
   redirect(`/admin/products/${created.id}?created=1`);

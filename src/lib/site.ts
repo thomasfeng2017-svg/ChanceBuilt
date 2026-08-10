@@ -59,7 +59,9 @@ export const SITE: SiteDetails = {
   email: "info@chancebuiltperformance.com",
 
   address: {
-    street: "12510 Magnolia Ave",
+    // Confirmed by the shop owner 2026-08-02. An earlier 12510 came from
+    // third-party listings and was wrong.
+    street: "12490 Magnolia Ave",
     city: "Riverside",
     state: "CA",
     zip: "92503",

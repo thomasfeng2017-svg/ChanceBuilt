@@ -97,18 +97,24 @@ export function ProductForm({
             />
           </label>
 
+          {/* Optional on purpose. The shop keeps no SKUs of its own, so
+              requiring one meant inventing an identifier nobody used. Left
+              blank it is generated, which is what happens in practice. */}
           <label className="block">
-            <span className={label}>SKU</span>
+            <span className={label}>
+              Product code <span className="font-normal text-muted">(optional)</span>
+            </span>
             <input
               name="sku"
-              required
               disabled={readOnly}
               defaultValue={initial.sku}
               className={`${input} font-mono`}
-              placeholder="CB-1234"
+              placeholder={isNew ? "Leave blank and we'll create one" : ""}
             />
             <span className="mt-1 block text-xs text-muted">
-              Unique. Fitment imports match on this.
+              {isNew
+                ? "Goes on invoices and order emails. Leave it blank unless you already have a code you use."
+                : "Appears on past orders and invoices. Changing it won't update those."}
             </span>
           </label>
 
