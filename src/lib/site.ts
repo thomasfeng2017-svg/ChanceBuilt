@@ -179,33 +179,25 @@ export const HOURS_LABEL = hoursLabel(SITE.hours);
 export const addressLine = `${SITE.address.street}, ${SITE.address.city}, ${SITE.address.state} ${SITE.address.zip}`;
 
 /**
- * Where "Directions" goes.
+ * Where "Directions" goes: the shop's own Google listing, chosen by the client.
  *
- * Targets the business by NAME plus address, not by coordinates, and not by the
- * long URL copied out of the browser bar.
+ * This is the share link from the Maps app. It resolves to the
+ * "ChanceBuilt Performance LLC" place page, so the customer lands on the
+ * listing with the photos, hours, reviews and a Directions button, rather than
+ * being thrown straight into turn-by-turn.
  *
- * Coordinates were tried first and are wrong in a way that is easy to miss:
- * another business, Valenz Auto Body, sits at this address, so a lat/lng
- * destination reverse-geocodes to their name and the customer is told they are
- * driving to the wrong shop. The place id from the listing URL does not save it
- * either, because the Maps URLs API expects the "ChIJ..." form and silently
- * discards the "0x...:0x..." one that appears in a browser URL.
- *
- * Naming the business resolves to its own listing, so the destination reads
- * "ChanceBuilt Performance LLC". Verified against Google directly.
- *
- * Built with the documented `?api=1` format rather than the pasted URL, which
- * carries an `entry=ttu` source tag and a `g_ep` build token that rot, and which
- * opens a satellite view of the pin instead of starting directions. This opens
- * turn-by-turn from wherever the customer is and hands off to the Maps app on a
- * phone, which is where nearly everyone taps it.
+ * Do not "improve" this into a coordinate link. Another business, Valenz Auto
+ * Body, shares 12490 Magnolia Ave, so a lat/lng destination reverse-geocodes to
+ * their name and tells the customer they are driving to the wrong shop. The
+ * place id in the long URL does not fix that either: the Maps URLs API wants
+ * the "ChIJ..." form and silently drops the "0x...:0x..." form that browser
+ * URLs carry. Both were tried and checked against Google.
  */
-export const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-  `${SITE.legalName}, ${SITE.address.street}, ${SITE.address.city}, ${SITE.address.state} ${SITE.address.zip}`,
-)}`;
+export const directionsUrl = "https://maps.app.goo.gl/UkAJoKUZVMg4L1d47";
 
 /**
- * The listing itself, for "see us on Google" rather than "take me there".
- * The cid is the decimal form of the 0x61b1804b92ae05a3 in the listing URL.
+ * The same listing addressed permanently rather than through a short link,
+ * kept as the fallback if that link ever stops resolving. The cid is the
+ * decimal form of the 0x61b1804b92ae05a3 in the listing URL.
  */
 export const mapsListingUrl = "https://maps.google.com/?cid=7039548754628576675";
