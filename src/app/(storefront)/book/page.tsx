@@ -4,7 +4,7 @@ import { getVehicle, vehicleLabel } from "@/lib/garage";
 import { upcomingDates, formatShopDate, BOOKING_HORIZON_DAYS } from "@/lib/booking";
 import { BookingFlow } from "@/components/BookingFlow";
 import { SectionPhoto } from "@/components/SectionPhoto";
-import { SITE, HOURS_LABEL, addressLine } from "@/lib/site";
+import { SITE, HOURS_LABEL, directionsUrl } from "@/lib/site";
 import { getCopy } from "@/lib/content";
 import { CopyText } from "@/components/CopyText";
 
@@ -90,7 +90,7 @@ export default async function BookPage({
             {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
           </address>
           <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(addressLine)}`}
+            href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="focus-ring mt-2 inline-block rounded text-sm text-muted underline underline-offset-2 hover:text-text"

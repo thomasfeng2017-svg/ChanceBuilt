@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Logo } from "@/components/Logo";
-import { SITE, HOURS_LABEL, addressLine } from "@/lib/site";
+import { SITE, HOURS_LABEL, directionsUrl } from "@/lib/site";
 import { SubscribeForm } from "@/components/SubscribeForm";
 
 /**
@@ -178,7 +178,7 @@ export default function StorefrontLayout({
                 {SITE.phone}
               </a>
               <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(addressLine)}`}
+                href={directionsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="focus-ring rounded py-0.5 text-sm text-muted underline underline-offset-2 hover:text-text"

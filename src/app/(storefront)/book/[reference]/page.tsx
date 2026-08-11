@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { formatShopDateTime } from "@/lib/booking";
 import { formatCents } from "@/lib/money";
-import { SITE, addressLine } from "@/lib/site";
+import { SITE, directionsUrl } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Appointment requested" };
 
@@ -83,7 +83,7 @@ export default async function AppointmentPage({
         </address>
         <div className="mt-3 flex flex-wrap gap-4">
           <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(addressLine)}`}
+            href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="focus-ring rounded text-muted underline underline-offset-2 hover:text-text"

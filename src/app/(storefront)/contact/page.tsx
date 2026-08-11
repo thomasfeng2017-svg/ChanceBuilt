@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { getCopy } from "@/lib/content";
 import { CopyText } from "@/components/CopyText";
-import { SITE, HOURS_LABEL, addressLine } from "@/lib/site";
+import { SITE, HOURS_LABEL, directionsUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -62,7 +62,7 @@ export default async function ContactPage() {
             {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
           </address>
           <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(addressLine)}`}
+            href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="focus-ring mt-3 inline-block rounded text-sm text-muted underline underline-offset-2 hover:text-text"
