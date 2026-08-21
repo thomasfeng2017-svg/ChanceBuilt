@@ -22,6 +22,19 @@ export type SlotGroup = {
 
 export const GALLERY_SLOT = "gallery";
 
+/**
+ * The wide banner behind the title on an engine's own page, derived from that
+ * engine's tile slot.
+ *
+ * Derived rather than written out twice so the registry below and the page that
+ * reads it cannot drift apart. The two are separate slots because one photo was
+ * being asked to work as a small landscape tile on the homepage and as a
+ * full-width banner on the engine page, and a crop that suits one rarely suits
+ * the other. Empty falls back to the tile photo, so nothing breaks before
+ * anyone gets round to shooting the wide version.
+ */
+export const engineBannerSlot = (tileSlot: string) => `${tileSlot}:banner`;
+
 export const SLOT_GROUPS: SlotGroup[] = [
   {
     title: "Homepage",
@@ -50,6 +63,17 @@ export const SLOT_GROUPS: SlotGroup[] = [
       { slot: "engine:s58", label: "S58", hint: "G80 M3, G82 M4, G87 M2, X3M / X4M.", aspect: "landscape" },
       { slot: "engine:b58", label: "B58", hint: "M340i, M240i, M440i, Z4 M40i, A90 Supra.", aspect: "landscape" },
       { slot: "engine:n54-n55", label: "N54 / N55", hint: "335i, 135i, 335is, E9x / F3x.", aspect: "landscape" },
+    ],
+  },
+  {
+    title: "Engine pages",
+    blurb:
+      "The wide photo behind the title on each engine page, the one you land on from a tile above. Leave one empty and it uses that engine's tile photo instead, which is fine but is a small landscape shot stretched across a wide banner.",
+    slots: [
+      { slot: engineBannerSlot("engine:s55"), label: "S55 page banner", hint: "Wide shot behind the S55 title.", aspect: "wide" },
+      { slot: engineBannerSlot("engine:s58"), label: "S58 page banner", hint: "Wide shot behind the S58 title.", aspect: "wide" },
+      { slot: engineBannerSlot("engine:b58"), label: "B58 page banner", hint: "Wide shot behind the B58 title.", aspect: "wide" },
+      { slot: engineBannerSlot("engine:n54-n55"), label: "N54 / N55 page banner", hint: "Wide shot behind the N54 / N55 title.", aspect: "wide" },
     ],
   },
   {

@@ -20,6 +20,7 @@ import { getSiteImage } from "@/lib/site-images";
  */
 export async function SectionPhoto({
   slot,
+  fallbackSlot,
   alt,
   className = "",
   imageClassName = "",
@@ -29,6 +30,8 @@ export async function SectionPhoto({
   scrim = false,
 }: {
   slot: string;
+  /** Used when `slot` has no photo, so a slot can be optional without a gap. */
+  fallbackSlot?: string;
   /** Overridden by the alt text set in the admin when one exists. */
   alt: string;
   className?: string;
@@ -37,7 +40,8 @@ export async function SectionPhoto({
   priority?: boolean;
   scrim?: boolean;
 }) {
-  const image = await getSiteImage(slot);
+  const image =
+    (await getSiteImage(slot)) ?? (fallbackSlot ? await getSiteImage(fallbackSlot) : null);
   if (!image) return null;
 
   /*

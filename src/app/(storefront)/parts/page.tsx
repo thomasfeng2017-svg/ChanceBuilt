@@ -18,6 +18,7 @@ import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE } from "@/lib/site";
 import { bandPadding } from "@/lib/band-height";
 import { Copy } from "@/components/Copy";
+import { engineBannerSlot } from "@/lib/image-slots";
 
 export const metadata: Metadata = { title: "Parts catalog" };
 
@@ -115,7 +116,8 @@ export default async function PartsPage({
       {enginePlatform && (
         <div className="relative border-b border-line">
           <SectionPhoto
-            slot={enginePlatform.slot}
+            slot={engineBannerSlot(enginePlatform.slot)}
+            fallbackSlot={enginePlatform.slot}
             alt=""
             className="absolute inset-0"
             imageClassName="opacity-45"

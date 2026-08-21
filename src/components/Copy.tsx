@@ -33,5 +33,12 @@ export async function Copy({
     return links ? <CopyText>{value}</CopyText> : <>{value}</>;
   }
 
-  return <EditableCopy blockKey={k} value={value} label={contentBlockDef(k)?.label} />;
+  return (
+    <EditableCopy
+      blockKey={k}
+      value={value}
+      label={contentBlockDef(k)?.label}
+      links={links}
+    />
+  );
 }

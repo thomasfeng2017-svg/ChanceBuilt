@@ -29,7 +29,9 @@ export default async function AboutPage() {
         priority
       />
 
-      <div className="mt-8 max-w-2xl space-y-5 text-sm leading-relaxed text-muted sm:text-base">
+      {/* Full column width, matching the photos above and below rather than
+          sitting in a narrower measure inside them. */}
+      <div className="mt-8 space-y-5 text-sm leading-relaxed text-muted sm:text-base">
         <p><Copy k="about.para1" /></p>
         <p><Copy k="about.para2" /></p>
         <p><Copy k="about.para3" /></p>
