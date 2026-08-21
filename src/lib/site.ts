@@ -56,7 +56,9 @@ export const SITE: SiteDetails = {
 
   phone: "(951) 539-2901",
   phoneHref: "tel:+19515392901",
-  email: "info@chancebuiltperformance.com",
+  // The one address customers are told to write to. Also the fallback for
+  // SHOP_NOTIFICATION_EMAIL, so shop alerts land here if that env var is unset.
+  email: "sales@chancebuiltperformance.com",
 
   address: {
     // Confirmed by the shop owner 2026-08-02. An earlier 12510 came from
