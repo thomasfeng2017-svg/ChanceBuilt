@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireUser, canWrite } from "@/lib/auth";
 import { CONTENT_GROUPS } from "@/lib/content-blocks";
 import { getCopyRows, getCustomisedKeys } from "@/lib/content";
@@ -16,10 +17,21 @@ export default async function ContentPage() {
       <header className="mb-6">
         <h1 className="display text-2xl">Text</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">
-          The wording customers read. Changes go live as soon as you save, no developer
-          needed. Clear a box and save to put it back the way it was written.
+          Every piece of wording on the site, in one list. Changes go live as soon as you
+          save. Clear a box and save to put it back the way it was written.
         </p>
       </header>
+
+      {/* The list is the fallback, not the front door. Most edits are easier
+          done on the page itself, and someone who landed here from a bookmark
+          should be told that rather than left to discover it. */}
+      <p className="mb-6 rounded-card border border-accent/30 bg-accent/[0.06] px-4 py-3 text-sm">
+        <span className="font-semibold">Easier way:</span> you can edit most of this
+        directly on the site, seeing it as customers do.{" "}
+        <Link href="/admin/edit" className="focus-ring rounded font-semibold text-accent-text underline underline-offset-2">
+          Edit on the site
+        </Link>
+      </p>
 
       {/*
         Instructions live here rather than in a README. Whoever is running the

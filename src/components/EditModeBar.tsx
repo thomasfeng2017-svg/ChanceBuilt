@@ -52,6 +52,14 @@ export function EditModeBar({ editing }: { editing: boolean }) {
         </p>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Editing happens on the storefront, which has no admin nav, so the
+              way back has to live here. */}
+          <Link
+            href="/admin"
+            className="focus-ring rounded px-3 py-1.5 text-xs text-muted hover:text-text"
+          >
+            Admin
+          </Link>
           <Link
             href="/admin/content"
             className="focus-ring rounded px-3 py-1.5 text-xs text-muted hover:text-text"

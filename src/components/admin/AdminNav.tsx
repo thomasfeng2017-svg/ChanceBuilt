@@ -30,7 +30,9 @@ const ITEMS: Item[] = [
   { href: "/admin/products", label: "Products" },
   { href: "/admin/services", label: "Services" },
   { href: "/admin/photos", label: "Photos" },
-  { href: "/admin/content", label: "Text" },
+  // Goes to the live editor on the site, not the form. The form is still
+  // reachable from the editing bar for the cases live editing cannot cover.
+  { href: "/admin/edit", label: "Text" },
   { href: "/admin/subscribers", label: "Mailing list" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/appointments", label: "Appointments", except: ["/admin/appointments/calendar"] },
