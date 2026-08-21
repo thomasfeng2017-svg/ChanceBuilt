@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionPhoto } from "@/components/SectionPhoto";
-import { getCopy } from "@/lib/content";
-import { CopyText } from "@/components/CopyText";
+import { Copy } from "@/components/Copy";
 import { SITE, HOURS_LABEL, directionsUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -11,15 +10,14 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const copy = await getCopy();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <header className="max-w-2xl">
-        <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("contact.eyebrow")}</p>
-        <h1 className="display mt-2 text-3xl sm:text-5xl">{copy("contact.heading")}</h1>
+        <p className="m-rule eyebrow text-[0.7rem] text-muted"><Copy k="contact.eyebrow" links={false} /></p>
+        <h1 className="display mt-2 text-3xl sm:text-5xl"><Copy k="contact.heading" links={false} /></h1>
         <p className="mt-4 text-sm text-muted sm:text-base">
-          <CopyText>{copy("contact.intro")}</CopyText>
+          <Copy k="contact.intro" />
         </p>
       </header>
 
@@ -115,7 +113,7 @@ export default async function ContactPage() {
       </div>
 
       <div className="mt-12 rounded-card border border-line bg-surface p-6 text-center sm:p-8">
-        <h2 className="display text-xl">{copy("contact.cta.heading")}</h2>
+        <h2 className="display text-xl"><Copy k="contact.cta.heading" links={false} /></h2>
         <Link
           href="/book"
           className="focus-ring mt-5 inline-block rounded bg-accent px-8 py-3.5 text-sm font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"

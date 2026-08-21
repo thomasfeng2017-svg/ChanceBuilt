@@ -5,8 +5,7 @@ import { upcomingDates, formatShopDate, BOOKING_HORIZON_DAYS } from "@/lib/booki
 import { BookingFlow } from "@/components/BookingFlow";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE, HOURS_LABEL, directionsUrl } from "@/lib/site";
-import { getCopy } from "@/lib/content";
-import { CopyText } from "@/components/CopyText";
+import { Copy } from "@/components/Copy";
 
 export const metadata: Metadata = {
   title: "Book a service",
@@ -29,8 +28,6 @@ export default async function BookPage({
     getVehicle(),
   ]);
 
-  const copy = await getCopy();
-
   const initial = serviceSlug ? services.find((s) => s.slug === serviceSlug) : undefined;
 
   const days = (
@@ -45,9 +42,9 @@ export default async function BookPage({
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <header className="mb-10">
         <p className="m-rule eyebrow text-[0.7rem] text-muted">Riverside, California</p>
-        <h1 className="display mt-2 text-3xl sm:text-4xl">{copy("book.heading")}</h1>
+        <h1 className="display mt-2 text-3xl sm:text-4xl"><Copy k="book.heading" links={false} /></h1>
         <p className="mt-3 max-w-xl text-sm text-muted">
-          <CopyText>{copy("book.intro")}</CopyText>{" "}
+          <Copy k="book.intro" />{" "}
           <a href={SITE.phoneHref} className="focus-ring rounded text-text underline underline-offset-2">
             {SITE.phone}
           </a>{" "}

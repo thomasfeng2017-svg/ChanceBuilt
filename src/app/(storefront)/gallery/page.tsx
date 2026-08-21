@@ -4,8 +4,7 @@ import Link from "next/link";
 import { getSiteImages } from "@/lib/site-images";
 import { GalleryVideo } from "@/components/GalleryVideo";
 import { GALLERY_SLOT } from "@/lib/image-slots";
-import { getCopy } from "@/lib/content";
-import { CopyText } from "@/components/CopyText";
+import { Copy } from "@/components/Copy";
 
 export const metadata: Metadata = {
   title: "Gallery",
@@ -15,15 +14,14 @@ export const metadata: Metadata = {
 
 export default async function GalleryPage() {
   const images = await getSiteImages(GALLERY_SLOT);
-  const copy = await getCopy();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <header className="max-w-2xl">
-        <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("gallery.eyebrow")}</p>
-        <h1 className="display mt-2 text-3xl sm:text-5xl">{copy("gallery.heading")}</h1>
+        <p className="m-rule eyebrow text-[0.7rem] text-muted"><Copy k="gallery.eyebrow" links={false} /></p>
+        <h1 className="display mt-2 text-3xl sm:text-5xl"><Copy k="gallery.heading" links={false} /></h1>
         <p className="mt-4 text-sm text-muted sm:text-base">
-          <CopyText>{copy("gallery.intro")}</CopyText>
+          <Copy k="gallery.intro" />
         </p>
       </header>
 
@@ -109,8 +107,8 @@ export default async function GalleryPage() {
       )}
 
       <div className="mt-14 rounded-card border border-line bg-surface p-6 text-center sm:p-8">
-        <h2 className="display text-xl">{copy("gallery.cta.heading")}</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted"><CopyText>{copy("gallery.cta.body")}</CopyText></p>
+        <h2 className="display text-xl"><Copy k="gallery.cta.heading" links={false} /></h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-muted"><Copy k="gallery.cta.body" /></p>
         <Link
           href="/book"
           className="focus-ring mt-5 inline-block rounded bg-accent px-8 py-3.5 text-sm font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"
