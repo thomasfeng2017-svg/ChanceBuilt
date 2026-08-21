@@ -12,7 +12,18 @@ const ROLE_LABEL: Record<string, string> = {
   VIEWER: "Read only",
 };
 
-type Item = { href: string; label: string; ownerOnly?: boolean; exact?: boolean };
+/**
+ * `except` stops a parent item staying lit on a child route that has its own
+ * nav entry. Appointments and Calendar share a path prefix, so without it both
+ * highlight at once and the nav looks broken.
+ */
+type Item = {
+  href: string;
+  label: string;
+  ownerOnly?: boolean;
+  exact?: boolean;
+  except?: string[];
+};
 
 const ITEMS: Item[] = [
   { href: "/admin", label: "Dashboard", exact: true },
@@ -22,7 +33,8 @@ const ITEMS: Item[] = [
   { href: "/admin/content", label: "Text" },
   { href: "/admin/subscribers", label: "Mailing list" },
   { href: "/admin/orders", label: "Orders" },
-  { href: "/admin/appointments", label: "Appointments" },
+  { href: "/admin/appointments", label: "Appointments", except: ["/admin/appointments/calendar"] },
+  { href: "/admin/appointments/calendar", label: "Calendar" },
   { href: "/admin/customers", label: "Customers" },
   { href: "/admin/users", label: "Users", ownerOnly: true },
 ];
@@ -33,8 +45,11 @@ export function AdminNav({ user }: { user: SessionUser }) {
 
   const visible = ITEMS.filter((i) => !i.ownerOnly || user.role === "OWNER");
 
-  const isActive = (item: Item) =>
-    item.exact ? pathname === item.href : pathname.startsWith(item.href);
+  const isActive = (item: Item) => {
+    if (item.exact) return pathname === item.href;
+    if (item.except?.some((p) => pathname.startsWith(p))) return false;
+    return pathname.startsWith(item.href);
+  };
 
   return (
     <nav
