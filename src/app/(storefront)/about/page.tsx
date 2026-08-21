@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionPhoto } from "@/components/SectionPhoto";
-import { getCopy } from "@/lib/content";
-import { CopyText } from "@/components/CopyText";
+import { Copy } from "@/components/Copy";
 import { SITE, HOURS_LABEL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -12,14 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const copy = await getCopy();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <header className="max-w-2xl">
-        <p className="m-rule eyebrow text-[0.7rem] text-muted">{copy("about.eyebrow")}</p>
+        <p className="m-rule eyebrow text-[0.7rem] text-muted"><Copy k="about.eyebrow" links={false} /></p>
         <h1 className="display mt-2 text-3xl sm:text-5xl">
-          <CopyText>{copy("about.heading")}</CopyText>
+          <Copy k="about.heading" />
         </h1>
       </header>
 
@@ -32,9 +30,9 @@ export default async function AboutPage() {
       />
 
       <div className="mt-8 max-w-2xl space-y-5 text-sm leading-relaxed text-muted sm:text-base">
-        <p><CopyText>{copy("about.para1")}</CopyText></p>
-        <p><CopyText>{copy("about.para2")}</CopyText></p>
-        <p><CopyText>{copy("about.para3")}</CopyText></p>
+        <p><Copy k="about.para1" /></p>
+        <p><Copy k="about.para2" /></p>
+        <p><Copy k="about.para3" /></p>
       </div>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

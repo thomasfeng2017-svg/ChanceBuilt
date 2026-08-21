@@ -59,3 +59,43 @@ export async function resetContentAction(key: string) {
   revalidatePath("/", "layout");
   return { ok: true as const };
 }
+
+/**
+ * Save one block, for editing in place on the site itself.
+ *
+ * Same rules as the bulk form: only registered keys are accepted, and a value
+ * matching the default deletes the row rather than storing a copy of it, so
+ * "has this been customised?" stays answerable and improved defaults still
+ * reach anyone who never touched that block.
+ *
+ * Returns the value that ended up in force, which is what the caller should
+ * display. Clearing a block does not leave it blank, it reverts to the wording
+ * in code, and the editor needs to show that rather than an empty box.
+ */
+export async function saveCopyBlockAction(
+  key: string,
+  raw: string,
+): Promise<{ ok: true; value: string } | { ok: false; error: string }> {
+  await requireWriter("STAFF");
+
+  if (!ALL_CONTENT_BLOCKS.some((b) => b.key === key)) {
+    return { ok: false, error: "Unknown content block." };
+  }
+
+  const value = raw.replace(/\r\n/g, "\n").trim();
+  const fallback = CONTENT_DEFAULTS[key];
+
+  if (!value || value === fallback.trim()) {
+    await prisma.contentBlock.deleteMany({ where: { key } });
+    revalidatePath("/", "layout");
+    return { ok: true, value: fallback };
+  }
+
+  await prisma.contentBlock.upsert({
+    where: { key },
+    create: { key, value },
+    update: { value },
+  });
+  revalidatePath("/", "layout");
+  return { ok: true, value };
+}

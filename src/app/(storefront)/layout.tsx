@@ -4,6 +4,8 @@ import { Header } from "@/components/Header";
 import { Logo } from "@/components/Logo";
 import { SITE, HOURS_LABEL, directionsUrl } from "@/lib/site";
 import { SubscribeForm } from "@/components/SubscribeForm";
+import { EditModeBar } from "@/components/EditModeBar";
+import { getEditContext } from "@/lib/edit-mode";
 
 /**
  * Public storefront chrome.
@@ -53,9 +55,11 @@ const jsonLd = {
   ].filter(Boolean),
 };
 
-export default function StorefrontLayout({
+export default async function StorefrontLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const edit = await getEditContext();
+
   return (
     <>
       <script
@@ -224,6 +228,7 @@ export default function StorefrontLayout({
           </p>
         </div>
       </footer>
+      {edit.canEdit && <EditModeBar editing={edit.editing} />}
     </>
   );
 }
