@@ -6,6 +6,7 @@ import { formatCents } from "@/lib/money";
 import { YmmSelector } from "./YmmSelector";
 import { SITE } from "@/lib/site";
 import type { Vehicle } from "@/lib/vehicle";
+import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 
 type Service = {
   id: string;
@@ -23,13 +24,9 @@ type Service = {
 type Slot = { startsAt: string; label: string; available: boolean; reason?: string };
 type Day = { date: string; label: string; open: boolean };
 
-const CATEGORY_LABEL: Record<string, string> = {
-  TUNING: "Tuning",
-  PERFORMANCE: "Performance",
-  MAINTENANCE: "Maintenance",
-  FABRICATION: "Fabrication",
-  DIAGNOSTIC: "Diagnostic",
-};
+const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
+  SERVICE_CATEGORIES.map((c) => [c.value, c.short]),
+);
 
 function durationLabel(minutes: number) {
   if (minutes < 60) return `${minutes} min`;

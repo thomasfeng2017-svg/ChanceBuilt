@@ -723,6 +723,8 @@ model Subscriber {
 enum ServiceCategory {
   TUNING
   PERFORMANCE
+  BRAKES
+  SUSPENSION
   MAINTENANCE
   FABRICATION
   DIAGNOSTIC

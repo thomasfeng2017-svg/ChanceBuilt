@@ -5,14 +5,9 @@ import { redirect } from "next/navigation";
 import type { ServiceCategory } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireWriter } from "@/lib/auth";
+import { SERVICE_CATEGORY_VALUES } from "@/lib/service-categories";
 
-const CATEGORIES: ServiceCategory[] = [
-  "TUNING",
-  "PERFORMANCE",
-  "MAINTENANCE",
-  "FABRICATION",
-  "DIAGNOSTIC",
-];
+const CATEGORIES: ServiceCategory[] = SERVICE_CATEGORY_VALUES;
 
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");

@@ -83,6 +83,8 @@ export const SLOT_GROUPS: SlotGroup[] = [
       { slot: "section:services-header", label: "Services page banner", hint: "Wide shot behind the Services title.", aspect: "wide" },
       { slot: "section:service-tuning", label: "Tuning & ECU", hint: "Someone at the laptop, or the dyno.", aspect: "landscape" },
       { slot: "section:service-performance", label: "Performance install", hint: "Hardware going on a car.", aspect: "landscape" },
+      { slot: "section:service-suspension", label: "Suspension & drivetrain", hint: "Coilovers, a clutch, or the car on the scales.", aspect: "landscape" },
+      { slot: "section:service-brakes", label: "Brakes", hint: "A big brake kit or a wheel off mid-job.", aspect: "landscape" },
       { slot: "section:service-maintenance", label: "Maintenance", hint: "Car on the lift.", aspect: "landscape" },
       { slot: "section:service-diagnostic", label: "Diagnostics", hint: "Scanner or a car being looked over.", aspect: "landscape" },
       { slot: "section:service-fabrication", label: "Fabrication & builds", hint: "Custom work, cages, a race car.", aspect: "landscape" },

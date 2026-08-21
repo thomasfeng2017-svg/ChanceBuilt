@@ -3,16 +3,13 @@ import { prisma } from "@/lib/db";
 import { requireUser, canWrite } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import { ServiceRowActions } from "@/components/admin/ServiceRowActions";
+import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 
 export const metadata = { title: "Services" };
 
-const CATEGORY_LABEL: Record<string, string> = {
-  TUNING: "Tuning & ECU",
-  PERFORMANCE: "Performance install",
-  MAINTENANCE: "Maintenance",
-  FABRICATION: "Fabrication & builds",
-  DIAGNOSTIC: "Diagnostics",
-};
+const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
+  SERVICE_CATEGORIES.map((c) => [c.value, c.title]),
+);
 
 function durationLabel(mins: number): string {
   if (mins < 60) return `${mins} min`;

@@ -6,36 +6,12 @@ import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE } from "@/lib/site";
 import { bandPadding } from "@/lib/band-height";
 import { Copy } from "@/components/Copy";
+import { SERVICE_CATEGORIES, serviceCategoryBlurbKey } from "@/lib/service-categories";
 
 export const metadata: Metadata = {
   title: "Services",
   description:
     "Tuning, ECU unlocks, turbo upgrades, maintenance, diagnostics and race car fabrication for turbocharged BMWs in Riverside, CA.",
-};
-
-const CATEGORY_ORDER = ["TUNING", "PERFORMANCE", "MAINTENANCE", "DIAGNOSTIC", "FABRICATION"] as const;
-
-const CATEGORY_COPY: Record<string, { title: string; slot: string }> = {
-  TUNING: {
-    title: "Tuning & ECU",
-    slot: "section:service-tuning",
-  },
-  PERFORMANCE: {
-    title: "Performance Installation",
-    slot: "section:service-performance",
-  },
-  MAINTENANCE: {
-    title: "Maintenance",
-    slot: "section:service-maintenance",
-  },
-  DIAGNOSTIC: {
-    title: "Diagnostics",
-    slot: "section:service-diagnostic",
-  },
-  FABRICATION: {
-    title: "Fabrication & Builds",
-    slot: "section:service-fabrication",
-  },
 };
 
 function durationLabel(minutes: number) {
@@ -103,8 +79,8 @@ export default async function ServicesPage() {
       </header>
 
       <div className="mt-14 space-y-14">
-        {CATEGORY_ORDER.filter((c) => grouped[c]?.length).map((category) => {
-          const copy = CATEGORY_COPY[category];
+        {SERVICE_CATEGORIES.filter((c) => grouped[c.value]?.length).map((copy) => {
+          const category = copy.value;
           return (
             <section key={category}>
               <div className="mb-5 flex flex-col gap-5 border-b border-line pb-5 sm:flex-row sm:items-center">
@@ -119,7 +95,7 @@ export default async function ServicesPage() {
                 <div>
                   <h2 className="display text-xl sm:text-2xl">{copy.title}</h2>
                   <p className="mt-1.5 max-w-2xl text-sm text-muted">
-                    <Copy k={`services.${category.toLowerCase()}.blurb`} />
+                    <Copy k={serviceCategoryBlurbKey(category)} />
                   </p>
                 </div>
               </div>

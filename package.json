@@ -17,7 +17,8 @@
     "user:create": "tsx scripts/create-user.ts",
     "images:import": "tsx scripts/import-site-images.ts",
     "images:dimensions": "tsx scripts/backfill-image-dimensions.ts",
-    "images:focal": "tsx scripts/auto-focal.ts"
+    "images:focal": "tsx scripts/auto-focal.ts",
+    "import:services": "tsx scripts/import-chancebuilt-services.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

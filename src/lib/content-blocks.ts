@@ -118,6 +118,16 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         text: "Hardware fitted properly, then tuned to work together rather than fight each other.",
       },
       {
+        key: "services.suspension.blurb",
+        label: "Suspension & drivetrain",
+        text: "Springs, coilovers, clutches and the parts that put the power down.",
+      },
+      {
+        key: "services.brakes.blurb",
+        label: "Brakes",
+        text: "Pads and rotors through to a full big brake kit, plus the fluid work people forget.",
+      },
+      {
         key: "services.maintenance.blurb",
         label: "Maintenance",
         text: "The scheduled work that keeps a tuned BMW alive, plus the failure points we know about.",

@@ -7,6 +7,7 @@ import {
   saveServiceAction,
   type ServiceFormState,
 } from "@/app/admin/(protected)/services/actions";
+import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 
 export type ServiceFormValues = {
   id?: string;
@@ -22,13 +23,7 @@ export type ServiceFormValues = {
   sortOrder: number;
 };
 
-const CATEGORIES = [
-  { value: "TUNING", label: "Tuning & ECU" },
-  { value: "PERFORMANCE", label: "Performance install" },
-  { value: "MAINTENANCE", label: "Maintenance" },
-  { value: "FABRICATION", label: "Fabrication & builds" },
-  { value: "DIAGNOSTIC", label: "Diagnostics" },
-];
+const CATEGORIES = SERVICE_CATEGORIES.map((c) => ({ value: c.value, label: c.title }));
 
 /** The grid the booking calendar works on, so only offer real slot lengths. */
 const DURATIONS = [30, 60, 90, 120, 150, 180, 240, 300, 360, 420, 480];
