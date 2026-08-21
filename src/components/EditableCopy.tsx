@@ -97,6 +97,25 @@ export function EditableCopy({
         title={label ?? blockKey}
         spellCheck
         onBlur={commit}
+        onPaste={(e) => {
+          /*
+            Paste as plain text.
+
+            A contentEditable accepts whatever the clipboard holds, so pasting
+            from Word or a web page drops spans, styles and sometimes images
+            straight into the element. The save reads innerText and would throw
+            the markup away, but only after the editor has spent a while
+            looking wrong, and an image pasted mid-sentence is worse than that.
+
+            execCommand is deprecated and used deliberately: it is still the
+            only insertion that participates in the browser native undo stack,
+            so Ctrl+Z steps back through pastes like it does through typing.
+            Rebuilding the selection by hand would break undo entirely.
+          */
+          e.preventDefault();
+          const text = e.clipboardData.getData("text/plain");
+          document.execCommand("insertText", false, text);
+        }}
         onKeyDown={(e) => {
           // Escape abandons the edit. Without it the only way out is to blur,
           // which saves, so a mistyped heading would have no undo.

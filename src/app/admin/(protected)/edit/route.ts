@@ -1,24 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSessionUser, canWrite } from "@/lib/auth";
-import { EDIT_MODE_COOKIE } from "@/lib/edit-mode";
+import { EDIT_PARAM } from "@/lib/edit-mode";
 
 /**
- * The "Text" tab: turn on in-place editing and drop the user on the site.
+ * The "Text" tab: open a page of the site with editing switched on.
  *
- * A route handler rather than a page because it has to set a cookie, which a
- * server component cannot do during render.
+ * Exists so there is one obvious way to change wording. Before it, editing
+ * lived behind a button on the storefront, which meant finding it required
+ * already knowing it was there.
  *
- * This exists so there is one obvious way to change wording. Before it, the
- * admin had a form full of fields at /admin/content while the actual live
- * editing lived behind a button on the storefront, which meant finding it
- * required knowing it was there. The form is still around for the cases live
- * editing cannot cover, but it is now the secondary route rather than the
- * front door.
+ * Sets nothing and stores nothing. Edit mode is a URL parameter, so leaving the
+ * page or opening a new tab returns to the ordinary site. That is deliberate:
+ * an earlier version used a session cookie and staff could not browse their own
+ * shop as a customer without remembering to switch editing off.
  *
- * `to` lets a caller choose the landing page, so a future "edit this page"
- * link from anywhere can come through here. Restricted to same-site paths: it
- * ends up in a redirect, and an open one would let a crafted link bounce a
- * signed-in staff member off to another host.
+ * `to` picks the landing page. Restricted to same-site paths, since it ends up
+ * in a redirect and an open one would let a crafted link bounce a signed-in
+ * staff member to another host.
  */
 export async function GET(request: NextRequest) {
   const user = await getSessionUser();
@@ -27,13 +25,9 @@ export async function GET(request: NextRequest) {
   }
 
   const requested = request.nextUrl.searchParams.get("to") ?? "/";
-  const to = requested.startsWith("/") && !requested.startsWith("//") ? requested : "/";
+  const safe = requested.startsWith("/") && !requested.startsWith("//") ? requested : "/";
 
-  const response = NextResponse.redirect(new URL(to, request.nextUrl.origin));
-  response.cookies.set(EDIT_MODE_COOKIE, "1", {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-  });
-  return response;
+  const target = new URL(safe, request.nextUrl.origin);
+  target.searchParams.set(EDIT_PARAM, "1");
+  return NextResponse.redirect(target);
 }

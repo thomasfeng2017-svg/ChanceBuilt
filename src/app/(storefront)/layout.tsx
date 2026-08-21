@@ -228,7 +228,7 @@ export default async function StorefrontLayout({
           </p>
         </div>
       </footer>
-      {edit.canEdit && <EditModeBar editing={edit.editing} />}
+      {edit.editing && <EditModeBar />}
     </>
   );
 }
