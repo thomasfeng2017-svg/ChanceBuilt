@@ -17,6 +17,7 @@ import { YmmSelector } from "@/components/YmmSelector";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE } from "@/lib/site";
 import { bandPadding } from "@/lib/band-height";
+import { Copy } from "@/components/Copy";
 
 export const metadata: Metadata = { title: "Parts catalog" };
 
@@ -151,10 +152,14 @@ export default async function PartsPage({
             scrim
           />
           <div className={`relative mx-auto max-w-7xl px-4 sm:px-6 ${partsBand}`}>
-            <p className="m-rule eyebrow text-[0.7rem] text-muted">The catalog</p>
-            <h1 className="display mt-2 text-3xl sm:text-4xl">Parts</h1>
+            <p className="m-rule eyebrow text-[0.7rem] text-muted">
+              <Copy k="parts.banner.eyebrow" />
+            </p>
+            <h1 className="display mt-2 text-3xl sm:text-4xl">
+              <Copy k="parts.banner.heading" />
+            </h1>
             <p className="mt-3 max-w-lg text-sm text-muted">
-              Everything we stock and fit, filtered to your exact chassis.
+              <Copy k="parts.banner.blurb" />
             </p>
           </div>
         </div>

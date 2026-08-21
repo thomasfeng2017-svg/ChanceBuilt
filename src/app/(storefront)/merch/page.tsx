@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { SortSelect } from "@/components/SortSelect";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { bandPadding } from "@/lib/band-height";
+import { Copy } from "@/components/Copy";
 
 export const metadata: Metadata = {
   title: "Shop merch",
@@ -86,10 +87,14 @@ export default async function MerchPage({
           scrim
         />
         <div className={`relative mx-auto max-w-7xl px-4 sm:px-6 ${merchBand}`}>
-          <p className="m-rule eyebrow text-[0.7rem] text-muted">Shop merch</p>
-          <h1 className="display mt-2 text-3xl sm:text-5xl">Wear the shop</h1>
+          <p className="m-rule eyebrow text-[0.7rem] text-muted">
+            <Copy k="merch.banner.eyebrow" />
+          </p>
+          <h1 className="display mt-2 text-3xl sm:text-5xl">
+            <Copy k="merch.banner.heading" />
+          </h1>
           <p className="mt-3 max-w-lg text-sm text-muted">
-            Hoodies, tees, hats and stickers. No chassis code required.
+            <Copy k="merch.banner.blurb" />
           </p>
         </div>
       </div>

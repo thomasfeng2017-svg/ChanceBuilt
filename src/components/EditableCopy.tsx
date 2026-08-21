@@ -32,6 +32,46 @@ import { saveCopyBlockAction } from "@/app/admin/(protected)/content/actions";
  * sentence. Showing the source is honest and matches the admin form.
  */
 
+/**
+ * HTML back to text, the inverse of toHtml.
+ *
+ * Deliberately not innerText, which returns the *rendered* text and so applies
+ * CSS text-transform. Most headings on this site are styled uppercase, so
+ * reading innerText and saving it wrote "PLATFORMS WE KNOW INSIDE OUT" into the
+ * database the first time anyone edited a heading, permanently replacing the
+ * real wording with shouting. textContent is untransformed but drops the breaks
+ * that separate paragraphs, so walk the nodes and keep both.
+ */
+function readText(root: HTMLElement): string {
+  let out = "";
+
+  const walk = (node: Node) => {
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        out += child.nodeValue ?? "";
+        continue;
+      }
+      if (child.nodeName === "BR") {
+        out += "\n";
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) continue;
+
+      // Browsers sometimes wrap a new line in a block element instead of
+      // inserting a break, so treat that boundary as a line break too.
+      const display = window.getComputedStyle(child as HTMLElement).display;
+      const block = display !== "inline" && display !== "inline-block" && display !== "contents";
+
+      if (block && out && !out.endsWith("\n")) out += "\n";
+      walk(child);
+      if (block && out && !out.endsWith("\n")) out += "\n";
+    }
+  };
+
+  walk(root);
+  return out;
+}
+
 /** Text to HTML. Newlines become breaks so multi-line blocks stay readable. */
 function toHtml(text: string): string {
   return text
@@ -63,7 +103,7 @@ export function EditableCopy({
   };
 
   const commit = () => {
-    const next = ref.current?.innerText ?? "";
+    const next = ref.current ? readText(ref.current) : "";
     if (next.trim() === value.trim()) {
       setState("idle");
       return;

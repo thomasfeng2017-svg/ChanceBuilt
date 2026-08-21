@@ -97,8 +97,10 @@ export const CONTENT_GROUPS: ContentGroup[] = [
   },
   {
     title: "Services page",
-    blurb: "The intro, plus the one-line description under each category heading.",
+    blurb: "The headings, the intro, and the one-line description under each category.",
     blocks: [
+      { key: "services.eyebrow", label: "Small line above the heading", text: "What we do" },
+      { key: "services.heading", label: "Heading", text: "Services" },
       {
         key: "services.intro",
         label: "Opening paragraph",
@@ -131,8 +133,18 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         text: "One-off work, cages, custom pipework and full race car builds.",
       },
       {
+        key: "services.platforms.eyebrow",
+        label: "Small line above the platforms heading",
+        text: "The engines",
+      },
+      {
+        key: "services.platforms.heading",
+        label: "Platforms heading",
+        text: "Platforms we know inside out",
+      },
+      {
         key: "services.platforms.blurb",
-        label: "Platforms block",
+        label: "Platforms paragraph",
         multiline: true,
         text: "We are not a general repair shop that also does BMWs. These are the engines we work on every day.",
       },
@@ -246,12 +258,14 @@ export const CONTENT_GROUPS: ContentGroup[] = [
     title: "Parts & merch",
     blurb: "The banner text at the top of the two shop pages.",
     blocks: [
+      { key: "parts.banner.eyebrow", label: "Parts small line", text: "The catalog" },
       { key: "parts.banner.heading", label: "Parts page heading", text: "Parts" },
       {
         key: "parts.banner.blurb",
         label: "Parts page line",
         text: "Everything we stock and fit, filtered to your exact chassis.",
       },
+      { key: "merch.banner.eyebrow", label: "Merch small line", text: "Shop merch" },
       { key: "merch.banner.heading", label: "Merch page heading", text: "Wear the shop" },
       {
         key: "merch.banner.blurb",

@@ -5,6 +5,7 @@ import { formatCents } from "@/lib/money";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { SITE } from "@/lib/site";
 import { bandPadding } from "@/lib/band-height";
+import { Copy } from "@/components/Copy";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -14,31 +15,25 @@ export const metadata: Metadata = {
 
 const CATEGORY_ORDER = ["TUNING", "PERFORMANCE", "MAINTENANCE", "DIAGNOSTIC", "FABRICATION"] as const;
 
-const CATEGORY_COPY: Record<string, { title: string; blurb: string; slot: string }> = {
+const CATEGORY_COPY: Record<string, { title: string; slot: string }> = {
   TUNING: {
     title: "Tuning & ECU",
-    blurb:
-      "Unlocks, flashing platforms and custom calibration. This is what the shop is built around.",
     slot: "section:service-tuning",
   },
   PERFORMANCE: {
     title: "Performance Installation",
-    blurb: "Hardware fitted properly, then tuned to work together rather than fight each other.",
     slot: "section:service-performance",
   },
   MAINTENANCE: {
     title: "Maintenance",
-    blurb: "The scheduled work that keeps a tuned BMW alive, plus the failure points we know about.",
     slot: "section:service-maintenance",
   },
   DIAGNOSTIC: {
     title: "Diagnostics",
-    blurb: "Proper diagnosis with BMW-specific tooling before anyone spends money on parts.",
     slot: "section:service-diagnostic",
   },
   FABRICATION: {
     title: "Fabrication & Builds",
-    blurb: "One-off work, cages, custom pipework and full race car builds.",
     slot: "section:service-fabrication",
   },
 };
@@ -77,17 +72,19 @@ export default async function ServicesPage() {
         />
         {/* Band height is set per photo in the admin. */}
         <div className={`relative mx-auto max-w-6xl px-4 sm:px-6 ${servicesBand}`}>
-          <p className="m-rule eyebrow text-[0.7rem] text-muted">What we do</p>
-          <h1 className="display mt-2 text-3xl sm:text-5xl">Services</h1>
+          <p className="m-rule eyebrow text-[0.7rem] text-muted">
+            <Copy k="services.eyebrow" />
+          </p>
+          <h1 className="display mt-2 text-3xl sm:text-5xl">
+            <Copy k="services.heading" />
+          </h1>
         </div>
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <header className="max-w-2xl">
         <p className="text-sm text-pretty text-muted sm:text-base">
-          We work on turbocharged BMWs (S55, S58, B58, N54 and N55) from a stage 1 flash through
-          to a full race car. Everything below can be booked online, and anything that needs a
-          conversation first starts with a consultation.
+          <Copy k="services.intro" />
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
@@ -121,7 +118,9 @@ export default async function ServicesPage() {
                 />
                 <div>
                   <h2 className="display text-xl sm:text-2xl">{copy.title}</h2>
-                  <p className="mt-1.5 max-w-2xl text-sm text-muted">{copy.blurb}</p>
+                  <p className="mt-1.5 max-w-2xl text-sm text-muted">
+                    <Copy k={`services.${category.toLowerCase()}.blurb`} />
+                  </p>
                 </div>
               </div>
 
@@ -172,11 +171,14 @@ export default async function ServicesPage() {
           need a hard stop at the end, and a light band does that better than
           another bordered card on the same black. */}
       <section className="section-paper mt-16 border border-line p-6 sm:p-8">
-        <p className="m-rule eyebrow text-[0.7rem] text-muted">The engines</p>
-        <h2 className="display mt-2 text-xl sm:text-2xl">Platforms we know inside out</h2>
+        <p className="m-rule eyebrow text-[0.7rem] text-muted">
+          <Copy k="services.platforms.eyebrow" />
+        </p>
+        <h2 className="display mt-2 text-xl sm:text-2xl">
+          <Copy k="services.platforms.heading" />
+        </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted">
-          We are not a general repair shop that also does BMWs. These are the engines we work on
-          every day.
+          <Copy k="services.platforms.blurb" />
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SITE.platforms.map((p) => (
