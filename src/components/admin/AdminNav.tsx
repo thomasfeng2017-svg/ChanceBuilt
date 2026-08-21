@@ -17,6 +17,7 @@ type Item = { href: string; label: string; ownerOnly?: boolean; exact?: boolean 
 const ITEMS: Item[] = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/services", label: "Services" },
   { href: "/admin/photos", label: "Photos" },
   { href: "/admin/content", label: "Text" },
   { href: "/admin/subscribers", label: "Mailing list" },
