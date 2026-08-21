@@ -39,11 +39,19 @@ export default async function AppointmentsPage({
 
   return (
     <div>
-      <header className="mb-6">
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
         <h1 className="display text-2xl">Appointments</h1>
         <p className="mt-1 text-sm text-muted">
           {appointments.length} appointment{appointments.length === 1 ? "" : "s"}
         </p>
+        </div>
+        <Link
+          href="/admin/appointments/calendar"
+          className="focus-ring rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition-colors hover:border-line-hi hover:text-text"
+        >
+          Calendar view
+        </Link>
       </header>
 
       <nav className="mb-5 flex flex-wrap gap-1.5">

@@ -85,6 +85,26 @@ export function shopWeekday(dateStr: string): number {
   return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(name);
 }
 
+/**
+ * The shop-local clock time as "HH:MM", 24-hour.
+ *
+ * Distinct from formatShopTime, which is for humans and returns "2:30 PM".
+ * An <input type="time"> only accepts the 24-hour form, and feeding it the
+ * display string silently leaves the field blank.
+ */
+export function shopTimeString(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: SHOP_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  // Intl can emit "24" for midnight in some runtimes; normalise it.
+  const hh = get("hour") === "24" ? "00" : get("hour");
+  return hh + ":" + get("minute");
+}
+
 /** Format an instant as a shop-local time like "10:30 AM". */
 export function formatShopTime(date: Date): string {
   return new Intl.DateTimeFormat("en-US", {

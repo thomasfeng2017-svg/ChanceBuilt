@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser, canWrite } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
-import { formatShopDateTime } from "@/lib/booking";
+import { formatShopDateTime, shopDateString, shopTimeString } from "@/lib/booking";
 import { StatusSelect } from "@/components/admin/StatusSelect";
 import { setAppointmentStatusAction } from "../../ops-actions";
+import { AppointmentEditForm } from "@/components/admin/AppointmentEditForm";
 
 export const metadata = { title: "Appointment" };
 
@@ -23,6 +24,15 @@ export default async function AppointmentDetailPage({
     include: { service: true },
   });
   if (!appointment) notFound();
+
+  // Only bookable services are offered, plus whichever one this appointment
+  // already uses, so a hidden service still shows rather than silently
+  // switching the booking to something else on save.
+  const services = await prisma.service.findMany({
+    where: { OR: [{ active: true }, { id: appointment.serviceId }] },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: { id: true, name: true, durationMinutes: true },
+  });
 
   const vehicle = [
     appointment.vehicleYear,
@@ -59,6 +69,28 @@ export default async function AppointmentDetailPage({
         <p className="mb-6 rounded border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
           Not confirmed yet. The customer is expecting a call or email back.
         </p>
+      )}
+
+      {canWrite(user.role) && (
+        <div className="mb-6">
+          <AppointmentEditForm
+            services={services}
+            initial={{
+              id: appointment.id,
+              customerName: appointment.customerName,
+              email: appointment.email,
+              phone: appointment.phone,
+              notes: appointment.notes ?? "",
+              serviceId: appointment.serviceId,
+              date: shopDateString(appointment.startsAt),
+              time: shopTimeString(appointment.startsAt),
+              vehicleYear: appointment.vehicleYear ? String(appointment.vehicleYear) : "",
+              vehicleMake: appointment.vehicleMake ?? "",
+              vehicleModel: appointment.vehicleModel ?? "",
+              vehicleChassis: appointment.vehicleChassis ?? "",
+            }}
+          />
+        </div>
       )}
 
       <dl className="divide-y divide-line rounded-card border border-line bg-surface text-sm">
