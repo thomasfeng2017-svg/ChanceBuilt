@@ -11,7 +11,7 @@ import { SERVICE_CATEGORIES, serviceCategoryBlurbKey } from "@/lib/service-categ
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Tuning, ECU unlocks, turbo upgrades, maintenance, diagnostics and race car fabrication for turbocharged BMWs in Riverside, CA.",
+    "Custom tuning, turbo and bolt-on upgrades, brakes, suspension and drivetrain work, and maintenance for turbocharged BMWs in Riverside, CA.",
 };
 
 function durationLabel(minutes: number) {

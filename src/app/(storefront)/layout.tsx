@@ -112,8 +112,8 @@ export default async function StorefrontLayout({
             <Logo height={44} />
             <p className="eyebrow mt-3 text-[0.6rem] text-muted">{SITE.tagline}</p>
             <p className="mt-4 text-sm text-muted">
-              Turbo BMW specialists in Riverside. Tuning, performance, maintenance and full race
-              car builds.
+              Turbo BMW specialists in Riverside. Tuning, performance upgrades, brakes, suspension
+              and maintenance.
             </p>
             <div className="mt-5 flex gap-2">
               {[

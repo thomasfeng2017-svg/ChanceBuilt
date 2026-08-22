@@ -9,7 +9,7 @@ import { Copy } from "@/components/Copy";
 export const metadata: Metadata = {
   title: "Gallery",
   description:
-    "Builds, installs and race cars out of ChanceBuilt Performance in Riverside, California.",
+    "Builds and installs out of ChanceBuilt Performance in Riverside, California.",
 };
 
 export default async function GalleryPage() {

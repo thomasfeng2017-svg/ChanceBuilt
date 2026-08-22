@@ -10,7 +10,7 @@ import { Copy } from "@/components/Copy";
 export const metadata: Metadata = {
   title: "Book a service",
   description:
-    "Book tuning, performance installation, maintenance or diagnostics at ChanceBuilt Performance in Riverside, CA.",
+    "Book custom tuning, performance upgrades, brakes, suspension or maintenance at ChanceBuilt Performance in Riverside, CA.",
 };
 
 export default async function BookPage({

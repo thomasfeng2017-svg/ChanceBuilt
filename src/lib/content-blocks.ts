@@ -59,7 +59,7 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         key: "home.hero.subhead",
         label: "Paragraph under the headline",
         multiline: true,
-        text: "S55, S58, B58, N54 and N55. Turbo upgrades, ECU unlocks and custom tuning, honest maintenance, and full race car builds, all done in-house.",
+        text: "S55, S58, B58, N54 and N55. Turbo upgrades, ECU unlocks and custom tuning, brakes, suspension and honest maintenance, all done in-house.",
       },
       {
         key: "home.tuning.heading",
@@ -105,7 +105,7 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         key: "services.intro",
         label: "Opening paragraph",
         multiline: true,
-        text: "We work on turbocharged BMWs (S55, S58, B58, N54 and N55) from a stage 1 flash through to a full race car. Everything below can be booked online, and anything that needs a conversation first starts with a consultation.",
+        text: "We work on turbocharged BMWs (S55, S58, B58, N54 and N55), from a stage 1 flash through to a single turbo build. Everything below can be booked online, and anything that needs a conversation first starts with a consultation.",
       },
       {
         key: "services.tuning.blurb",
@@ -132,16 +132,12 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         label: "Maintenance",
         text: "The scheduled work that keeps a tuned BMW alive, plus the failure points we know about.",
       },
-      {
-        key: "services.diagnostic.blurb",
-        label: "Diagnostics",
-        text: "Proper diagnosis with BMW-specific tooling before anyone spends money on parts.",
-      },
-      {
-        key: "services.fabrication.blurb",
-        label: "Fabrication & builds",
-        text: "One-off work, cages, custom pipework and full race car builds.",
-      },
+      /*
+        No diagnostics or fabrication blurb, because Chance does not list either
+        as something he sells and both sections are empty. The categories still
+        exist in the admin, so adding a service to one brings its section back;
+        it will just want a line of copy written for it at that point.
+      */
       {
         key: "services.platforms.eyebrow",
         label: "Small line above the platforms heading",
@@ -188,7 +184,7 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         key: "about.para3",
         label: "Third paragraph",
         multiline: true,
-        text: "We do the tuning in-house. We do the fabrication in-house. And we would rather talk you out of a bad idea than take your money for it.",
+        text: "We do the tuning in-house, and we do the installs in-house. And we would rather talk you out of a bad idea than take your money for it.",
       },
     ],
   },
@@ -237,7 +233,7 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         label: "Opening paragraph",
         hint: "Write a link as [the words](/where-it-goes), or a full https:// address.",
         multiline: true,
-        text: "Builds, installs and race cars out of the shop. More on [Instagram](https://www.instagram.com/chancebuiltllc/).",
+        text: "Builds and installs out of the shop. More on [Instagram](https://www.instagram.com/chancebuiltllc/).",
       },
       {
         key: "gallery.cta.heading",

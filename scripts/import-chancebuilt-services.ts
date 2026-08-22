@@ -346,24 +346,6 @@ const SERVICES: Svc[] = [
   },
 ];
 
-/**
- * Services Chance did not list, kept anyway pending his confirmation.
- *
- * These are capabilities the rest of the site already claims. The About page
- * says fabrication is done in-house, and the services page has Diagnostics and
- * Fabrication sections that would render empty without them, so deleting these
- * would have the site advertising work it then offers no way to book.
- *
- * Their invented prices are stripped, so they read "Quote / after review" like
- * everything else rather than quoting numbers nobody at the shop chose.
- */
-const KEEP_PENDING_CONFIRMATION = [
-  "diagnostic-fault-code-scan",
-  "pre-purchase-inspection",
-  "custom-fabrication",
-  "race-car-build-consultation",
-];
-
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
@@ -378,10 +360,7 @@ async function main() {
   });
   const wanted = new Map(SERVICES.map((s) => [slugify(s.name), s]));
 
-  const kept = existing.filter((e) => KEEP_PENDING_CONFIRMATION.includes(e.slug));
-  const stale = existing.filter(
-    (e) => !wanted.has(e.slug) && !KEEP_PENDING_CONFIRMATION.includes(e.slug),
-  );
+  const stale = existing.filter((e) => !wanted.has(e.slug));
   const booked = stale.length
     ? await prisma.appointment.groupBy({
         by: ["serviceId"],
@@ -400,8 +379,6 @@ async function main() {
     console.log(`  ${bookedIds.has(s.id) ? "retire (has bookings)" : "delete"}  ${s.name}`);
   }
 
-  console.log(`\nNot in the list, KEPT for Chance to confirm (${kept.length}):`);
-  for (const s of kept) console.log(`  keep, price cleared  ${s.name}`);
 
   if (!APPLY) {
     console.log("\nDry run. Re-run with --apply to write.");
@@ -435,14 +412,6 @@ async function main() {
     });
     if (before) updated++;
     else created++;
-  }
-
-  // Sort the kept ones after Chance's own list, and drop their made-up prices.
-  for (const [i, s] of kept.entries()) {
-    await prisma.service.update({
-      where: { id: s.id },
-      data: { priceFromCents: null, priceNote: null, sortOrder: SERVICES.length + i },
-    });
   }
 
   let deleted = 0;

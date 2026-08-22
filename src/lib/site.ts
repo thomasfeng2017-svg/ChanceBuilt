@@ -52,7 +52,7 @@ export const SITE: SiteDetails = {
   legalName: "ChanceBuilt Performance LLC",
   tagline: "BMW Performance Specialists",
   description:
-    "BMW performance specialists in Riverside, California. Turbo upgrades, ECU unlocks and custom tuning, maintenance and full race car builds for S55, B58, S58 and N54/N55 platforms.",
+    "BMW performance specialists in Riverside, California. Turbo upgrades, ECU unlocks and custom tuning, brakes, suspension and maintenance for S55, B58, S58 and N54/N55 platforms.",
 
   phone: "(951) 539-2901",
   phoneHref: "tel:+19515392901",
