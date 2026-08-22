@@ -4,6 +4,8 @@ import { requireUser, canWrite } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import { ServiceRowActions } from "@/components/admin/ServiceRowActions";
 import { SERVICE_CATEGORIES } from "@/lib/service-categories";
+import { CHANCEBUILT_SERVICE_SLUGS } from "@/lib/chancebuilt-services";
+import { ImportServicesPanel } from "@/components/admin/ImportServicesPanel";
 
 export const metadata = { title: "Services" };
 
@@ -29,6 +31,13 @@ export default async function ServicesAdminPage() {
 
   const live = services.filter((s) => s.active);
 
+  /*
+    Offer the one-time load only while none of the shop's own list is present.
+    Keyed on that rather than on "are there any services", so it disappears for
+    good once loaded and cannot later delete services added by hand.
+  */
+  const listLoaded = services.some((s) => CHANCEBUILT_SERVICE_SLUGS.includes(s.slug));
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -48,6 +57,10 @@ export default async function ServicesAdminPage() {
           </Link>
         )}
       </div>
+
+      {!listLoaded && writable && (
+        <ImportServicesPanel replacing={services.length} />
+      )}
 
       {/* Said once, at the top, because it is the thing most likely to be
           changed without realising the consequence. */}

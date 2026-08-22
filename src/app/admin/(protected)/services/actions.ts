@@ -6,6 +6,11 @@ import type { ServiceCategory } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireWriter } from "@/lib/auth";
 import { SERVICE_CATEGORY_VALUES } from "@/lib/service-categories";
+import {
+  CHANCEBUILT_SERVICES,
+  CHANCEBUILT_SERVICE_SLUGS,
+  serviceSlug,
+} from "@/lib/chancebuilt-services";
 
 const CATEGORIES: ServiceCategory[] = SERVICE_CATEGORY_VALUES;
 
@@ -168,4 +173,83 @@ export async function moveServiceAction(serviceId: string, direction: "up" | "do
   revalidatePath("/services");
   revalidatePath("/book");
   return { ok: true as const };
+}
+
+/**
+ * Load Chance's service list, replacing whatever is there.
+ *
+ * Exists so nobody has to hold a database password to get the shop's own
+ * services onto the site. The same work used to require running a script with
+ * the production connection string pasted into a terminal, which is a
+ * dangerous thing to ask someone to do routinely and an easy thing to get
+ * wrong.
+ *
+ * Destructive by design: services not on the list are removed, because the
+ * point is to clear out the placeholders the site shipped with. Anything with
+ * appointments booked against it is deactivated instead of deleted, so booking
+ * history and past invoices keep working.
+ *
+ * The admin only offers this while none of the list is loaded, so it cannot be
+ * clicked later and quietly delete services Chance has added himself.
+ */
+export async function importChancebuiltServicesAction() {
+  // Same level as the rest of this screen. Anyone who can reach it can already
+  // delete services one at a time, so a stricter gate here would only risk the
+  // button being invisible to the person who needs it.
+  await requireWriter("STAFF");
+
+  const existing = await prisma.service.findMany({ select: { id: true, slug: true } });
+  const wanted = new Set(CHANCEBUILT_SERVICE_SLUGS);
+  const stale = existing.filter((e) => !wanted.has(e.slug));
+
+  const booked = stale.length
+    ? await prisma.appointment.groupBy({
+        by: ["serviceId"],
+        where: { serviceId: { in: stale.map((s) => s.id) } },
+        _count: { _all: true },
+      })
+    : [];
+  const bookedIds = new Set(booked.map((b) => b.serviceId));
+
+  let loaded = 0;
+  for (const [index, svc] of CHANCEBUILT_SERVICES.entries()) {
+    const data = {
+      name: svc.name,
+      blurb: svc.blurb,
+      description: svc.description,
+      category: svc.category,
+      // Quote-only until Chance sets prices. See the note in the service list.
+      priceFromCents: null,
+      priceNote: null,
+      durationMinutes: svc.minutes,
+      requiresVehicle: true,
+      sortOrder: index,
+      active: true,
+    };
+    await prisma.service.upsert({
+      where: { slug: serviceSlug(svc.name) },
+      create: { slug: serviceSlug(svc.name), ...data },
+      update: data,
+    });
+    loaded++;
+  }
+
+  let removed = 0;
+  let retired = 0;
+  for (const s of stale) {
+    if (bookedIds.has(s.id)) {
+      await prisma.service.update({ where: { id: s.id }, data: { active: false } });
+      retired++;
+    } else {
+      await prisma.service.delete({ where: { id: s.id } });
+      removed++;
+    }
+  }
+
+  revalidatePath("/admin/services");
+  revalidatePath("/services");
+  revalidatePath("/book");
+  revalidatePath("/");
+
+  return { ok: true as const, loaded, removed, retired };
 }
