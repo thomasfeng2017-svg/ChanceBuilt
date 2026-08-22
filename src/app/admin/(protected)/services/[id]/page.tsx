@@ -68,6 +68,7 @@ export default async function EditServicePage({
               ? ""
               : (service.priceFromCents / 100).toFixed(2),
           priceNote: service.priceNote ?? "",
+          turnaround: service.turnaround ?? "",
           durationMinutes: service.durationMinutes,
           requiresVehicle: service.requiresVehicle,
           active: service.active,

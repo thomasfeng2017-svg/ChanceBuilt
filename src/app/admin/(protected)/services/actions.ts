@@ -52,6 +52,7 @@ export async function saveServiceAction(
   const description = String(formData.get("description") ?? "").trim();
   const category = String(formData.get("category") ?? "") as ServiceCategory;
   const priceNote = String(formData.get("priceNote") ?? "").trim();
+  const turnaround = String(formData.get("turnaround") ?? "").trim();
   const requiresVehicle = formData.get("requiresVehicle") === "on";
   const active = formData.get("active") === "on";
 
@@ -98,6 +99,7 @@ export async function saveServiceAction(
     category,
     priceFromCents,
     priceNote: priceNote || null,
+    turnaround: turnaround || null,
     durationMinutes,
     requiresVehicle,
     active,
@@ -222,6 +224,7 @@ export async function importChancebuiltServicesAction() {
       priceFromCents: null,
       priceNote: null,
       durationMinutes: svc.minutes,
+      turnaround: svc.turnaround ?? null,
       requiresVehicle: true,
       sortOrder: index,
       active: true,

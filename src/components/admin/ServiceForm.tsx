@@ -17,6 +17,7 @@ export type ServiceFormValues = {
   category: string;
   priceFrom: string;
   priceNote: string;
+  turnaround: string;
   durationMinutes: number;
   requiresVehicle: boolean;
   active: boolean;
@@ -210,6 +211,28 @@ export function ServiceForm({
             <span className="mt-1 block text-xs text-muted">
               Blocks {durationLabel(duration)} of one bay. For jobs that keep the
               car for days, book a short intake slot instead.
+            </span>
+          </label>
+
+          {/* The other half of that advice. Booking a short intake slot for a
+              week-long job is right for the calendar and wrong for the customer,
+              unless there is somewhere to say how long the car is actually
+              gone. This is that somewhere. */}
+          <label className="block">
+            <span className={label}>
+              Time in the shop <span className="font-normal text-muted">(optional)</span>
+            </span>
+            <input
+              name="turnaround"
+              disabled={readOnly}
+              defaultValue={initial.turnaround}
+              className={input}
+              placeholder="2 to 3 days"
+            />
+            <span className="mt-1 block text-xs text-muted">
+              Shown to customers instead of the appointment length. Fill this in
+              when the car stays longer than the slot, so a week-long job does
+              not advertise itself as an hour.
             </span>
           </label>
         </div>

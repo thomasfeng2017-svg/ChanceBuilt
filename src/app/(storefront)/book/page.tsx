@@ -63,6 +63,7 @@ export default async function BookPage({
           priceFromCents: s.priceFromCents,
           priceNote: s.priceNote,
           durationMinutes: s.durationMinutes,
+          turnaround: s.turnaround,
           requiresVehicle: s.requiresVehicle,
         }))}
         days={days}

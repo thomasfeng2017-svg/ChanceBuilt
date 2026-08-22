@@ -36,6 +36,7 @@ export default async function NewServicePage() {
           category: "",
           priceFrom: "",
           priceNote: "",
+          turnaround: "",
           durationMinutes: 60,
           requiresVehicle: true,
           active: true,

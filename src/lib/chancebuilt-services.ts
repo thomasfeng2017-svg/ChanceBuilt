@@ -11,22 +11,31 @@ import type { ServiceCategory } from "@prisma/client";
  * service without one as "Quote, after review", which is honest. A made-up
  * number on a brake job is a number a customer will hold him to.
  *
- * Durations are estimates and matter more than they look: slot length is what
- * stops the booking calendar handing out two appointments for one bay. They
- * lean long on purpose, so the failure is an empty slot rather than a double
- * booking, and Chance can correct them per service in the admin.
+ * Two different times, because one number could not carry both.
+ *
+ * `minutes` is the appointment: what the calendar blocks out, taken from the
+ * slot lengths the booking form offers. `turnaround` is what the customer is
+ * told, and only appears where the car stays longer than the appointment. A
+ * motor swap is a one hour hand-over and a fortnight of work; with a single
+ * field the site cheerfully advertised it as taking an hour.
+ *
+ * The numbers are anchored on published BMW labour times where those exist:
+ * roughly 10 to 14 hours and a 2 to 3 day turnaround for an N55 timing chain,
+ * around 14 hours to replace a set of N54 turbos, 2 to 3 hours for a water pump
+ * and thermostat, and 1 to 2 hours for plugs. Everything else is scaled against
+ * those. They are still a starting point, not gospel: Chance knows his own bays
+ * and can correct any of them in the admin.
  */
 export type ChancebuiltService = {
   name: string;
   category: ServiceCategory;
   blurb: string;
   description: string;
+  /** Appointment length, from the slot lengths the booking calendar offers. */
   minutes: number;
+  /** What the customer is told, when the car stays longer than the appointment. */
+  turnaround?: string;
 };
-
-/** A nominal drop-off slot, for jobs where the car stays and the appointment
- *  is really just the hand-over. */
-const DROP_OFF = 60;
 
 export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
   // ---- Custom engine calibrations ------------------------------------------
@@ -78,7 +87,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Intake fitted and checked for real airflow, not noise.",
     description:
       "Intake installation with the fitment and sealing checked properly, so you gain airflow rather than just induction noise and hot air.",
-    minutes: 120,
+    minutes: 90,
   },
   {
     name: "Intake Manifold Upgrade",
@@ -86,7 +95,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Manifold upgrades for cars chasing bigger numbers.",
     description:
       "Upgraded intake manifold installation for builds where the stock manifold has become the restriction. Includes the supporting work to get it sealed and running right.",
-    minutes: 300,
+    minutes: 360,
+    turnaround: "A full day",
   },
   {
     name: "Turbo Upgrade",
@@ -94,7 +104,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Stock replacement or upgraded turbos, fitted and calibrated.",
     description:
       "Turbocharger work, whether that is a stock replacement or a step up in size, including the supporting hardware and the calibration once it is together. Multi-day job, so the booking is your drop-off.",
-    minutes: DROP_OFF,
+    minutes: 60,
+    turnaround: "2 to 3 days",
   },
   {
     name: "Single Turbo Conversion",
@@ -102,7 +113,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Full single turbo builds, start to finish.",
     description:
       "Single turbo conversion including manifold, fuelling, cooling and the calibration to bring it all together. This is a build rather than a job, so it starts with a conversation and a plan.",
-    minutes: DROP_OFF,
+    minutes: 60,
+    turnaround: "1 to 2 weeks",
   },
   {
     name: "Full Exhaust Installation",
@@ -110,7 +122,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Turbo-back and cat-back exhaust systems fitted.",
     description:
       "Full exhaust installation, from the turbo back or the cat back, fitted so it sits right and does not drone or knock on the underside of the car.",
-    minutes: 240,
+    minutes: 180,
   },
   {
     name: "Oil & Cooling Upgrades",
@@ -119,6 +131,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     description:
       "Oil coolers, upgraded radiators, chargecoolers and the rest of the cooling side. The upgrade nobody wants to pay for until the first hot lap or the first summer traffic jam.",
     minutes: 300,
+    turnaround: "1 to 2 days",
   },
   {
     name: "Fuel System Upgrades",
@@ -126,7 +139,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Low pressure and high pressure pumps, and port injection.",
     description:
       "Fuel system work: low pressure fuel pump upgrades, high pressure fuel pump upgrades and port injection installations. Required once power goes beyond what the stock fuelling can feed, particularly on ethanol blends.",
-    minutes: 300,
+    minutes: 60,
+    turnaround: "2 to 3 days",
   },
 
   // ---- Suspension and drivetrain --------------------------------------------
@@ -145,6 +159,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     description:
       "Coilover installation and setup, with ride height and damping set for your intended use rather than slammed by default. Tell us whether the car is street, canyon or track.",
     minutes: 300,
+    turnaround: "Most of a day",
   },
   {
     name: "Clutch & Flywheel Replacement",
@@ -152,7 +167,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Upgraded clutch and flywheel, replaced or installed.",
     description:
       "Clutch and flywheel replacement, including upgraded setups for cars making more power than the stock clutch can hold. Car stays with us, so the booking is your drop-off.",
-    minutes: DROP_OFF,
+    minutes: 60,
+    turnaround: "2 to 3 days",
   },
   {
     name: "Driveshaft Installation",
@@ -160,7 +176,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Driveshaft upgrades and replacements.",
     description:
       "Driveshaft installation, including upgraded shafts for high power builds where the stock item becomes the weak link.",
-    minutes: 300,
+    minutes: 240,
   },
   {
     name: "Differential Bushing Installation",
@@ -169,6 +185,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     description:
       "Differential bushing replacement, which cleans up the slop in the rear end and is well worth doing while the car is apart for other drivetrain work.",
     minutes: 300,
+    turnaround: "A full day",
   },
   {
     name: "Control Arm Replacement",
@@ -194,7 +211,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Rotors replaced, usually alongside pads.",
     description:
       "Brake rotor replacement, normally done with pads so the new pads bed onto a clean surface rather than into someone else's wear pattern.",
-    minutes: 180,
+    minutes: 150,
   },
   {
     name: "Brake Pad Sensor Replacement",
@@ -211,6 +228,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     description:
       "Big brake kit installation, including fitment checks against your wheels, fresh fluid and a proper bedding-in procedure. Worth doing before the track day rather than after.",
     minutes: 300,
+    turnaround: "A full day",
   },
   {
     name: "Small Brake Kit Installation",
@@ -226,7 +244,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Fresh fluid, which matters more than people think.",
     description:
       "Complete brake fluid flush. Old fluid absorbs water and boils under hard use, which is what a soft pedal halfway through a session actually is. Due every couple of years, sooner if you track the car.",
-    minutes: 90,
+    minutes: 60,
   },
 
   // ---- Maintenance ----------------------------------------------------------
@@ -252,7 +270,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Fresh coolant, correct BMW spec.",
     description:
       "Complete coolant flush and refill with the correct specification coolant, plus a pressure check of the system while we are in there.",
-    minutes: 120,
+    minutes: 90,
   },
   {
     name: "Differential Service",
@@ -260,7 +278,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Front and rear differential fluid.",
     description:
       "Differential fluid service, front and rear. Frequently skipped, and the reason a lot of high mileage diffs whine.",
-    minutes: 120,
+    minutes: 90,
   },
   {
     name: "Water Pump & Thermostat",
@@ -268,7 +286,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "The known cooling failure point on these engines.",
     description:
       "Water pump and thermostat replacement, one of the best known failure points on these engines and much cheaper to do before it strands you than after.",
-    minutes: 300,
+    minutes: 180,
   },
   {
     name: "Fuel Injector Service",
@@ -284,7 +302,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "The usual source of a burning oil smell.",
     description:
       "Valve cover and valve cover gasket replacement. If you can smell oil after a drive and there is nothing on the driveway, this is usually why.",
-    minutes: 300,
+    minutes: 240,
   },
   {
     name: "Oil Pan Gasket Replacement",
@@ -292,7 +310,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "The other common oil leak, and a bigger job.",
     description:
       "Oil pan and oil pan gasket work. A bigger job than it sounds on these cars because of what has to come out to reach it, so the booking is your drop-off.",
-    minutes: DROP_OFF,
+    minutes: 60,
+    turnaround: "2 to 3 days",
   },
   {
     name: "Timing Chain Replacement",
@@ -300,7 +319,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Before it goes, not after.",
     description:
       "Timing chain and guide replacement. On the engines where this is a known issue it is worth doing preventatively, because the failure takes the engine with it. Multi-day job.",
-    minutes: DROP_OFF,
+    minutes: 60,
+    turnaround: "3 to 5 days",
   },
   {
     name: "Belt & Pulley Replacement",
@@ -308,7 +328,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Belts, tensioners and pulleys as a set.",
     description:
       "Serpentine belt, tensioner and pulley replacement. Done as a set, because replacing a belt and leaving a failing tensioner just moves the problem a few thousand miles down the road.",
-    minutes: 180,
+    minutes: 150,
   },
   {
     name: "Motor Mount Replacement",
@@ -316,7 +336,7 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Collapsed mounts, and the shake that comes with them.",
     description:
       "Engine mount replacement, including upgraded mounts for higher power cars. Worn mounts show up as vibration at idle and a clunk when you get on and off the throttle.",
-    minutes: 300,
+    minutes: 240,
   },
   {
     name: "Motor Swap",
@@ -324,7 +344,8 @@ export const CHANCEBUILT_SERVICES: ChancebuiltService[] = [
     blurb: "Full engine replacement or conversion.",
     description:
       "Engine replacement or swap, including the wiring, mounting and calibration work to make it run properly in the car. This starts with a conversation about what you are trying to build.",
-    minutes: DROP_OFF,
+    minutes: 60,
+    turnaround: "1 to 2 weeks",
   },
 ];
 

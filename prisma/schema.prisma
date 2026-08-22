@@ -751,6 +751,16 @@ model Service {
   /// stays longer, but the calendar only needs the intake appointment.
   durationMinutes Int
 
+  /// How long the car is actually with us, in the shop's own words: "2 to 3
+  /// days". Only needed when that differs from the appointment length.
+  ///
+  /// Exists because durationMinutes was doing two incompatible jobs. It sizes
+  /// the calendar slot, and it was also shown to customers as "N hrs in the
+  /// shop". Those agree for an oil change and are nonsense for an engine swap,
+  /// which is a one hour hand-over and a fortnight of work, and the site was
+  /// telling people a motor swap took an hour.
+  turnaround String?
+
   /// Whether the booking form requires a vehicle. Almost everything does.
   requiresVehicle Boolean @default(true)
 

@@ -92,6 +92,7 @@ async function main() {
       priceFromCents: null,
       priceNote: null,
       durationMinutes: svc.minutes,
+      turnaround: svc.turnaround ?? null,
       requiresVehicle: true,
       sortOrder: index,
       active: true,

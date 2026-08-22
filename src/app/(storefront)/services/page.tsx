@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 function durationLabel(minutes: number) {
   if (minutes < 60) return `${minutes} min`;
   const h = minutes / 60;
-  return `${Number.isInteger(h) ? h : h.toFixed(1)} hrs`;
+  return `${Number.isInteger(h) ? h : h.toFixed(1)} ${h === 1 ? "hr" : "hrs"}`;
 }
 
 export default async function ServicesPage() {
@@ -126,7 +126,7 @@ export default async function ServicesPage() {
 
                     <div className="mt-5 flex items-center justify-between gap-4 border-t border-line pt-4">
                       <span className="text-xs text-muted">
-                        {durationLabel(s.durationMinutes)} in the shop
+                        {s.turnaround ?? durationLabel(s.durationMinutes)} in the shop
                       </span>
                       <Link
                         href={`/book?service=${s.slug}`}

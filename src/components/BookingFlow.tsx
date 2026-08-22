@@ -18,6 +18,8 @@ type Service = {
   priceFromCents: number | null;
   priceNote: string | null;
   durationMinutes: number;
+  /** How long the car is with the shop, when that outlasts the appointment. */
+  turnaround: string | null;
   requiresVehicle: boolean;
 };
 
@@ -172,7 +174,7 @@ export function BookingFlow({
                             ? `${formatCents(s.priceFromCents)}${s.priceNote ? "" : "+"}`
                             : "Quote"}
                         </span>
-                        <span className="text-muted">{durationLabel(s.durationMinutes)}</span>
+                        <span className="text-muted">{s.turnaround ?? durationLabel(s.durationMinutes)}</span>
                         {s.priceNote && <span className="text-muted">{s.priceNote}</span>}
                       </p>
                     </button>
@@ -192,7 +194,10 @@ export function BookingFlow({
 
         {service && (
           <p className="mt-2 text-sm text-muted">
-            {service.name} · {durationLabel(service.durationMinutes)} in the shop
+            {service.name} ·{" "}
+            {service.turnaround
+              ? `${durationLabel(service.durationMinutes)} drop-off, ${service.turnaround} in the shop`
+              : `${durationLabel(service.durationMinutes)} in the shop`}
           </p>
         )}
 
