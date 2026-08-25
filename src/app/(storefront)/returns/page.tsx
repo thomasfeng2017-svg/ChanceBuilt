@@ -73,7 +73,6 @@ export default function ReturnsPage() {
           </li>
           <li>Custom and special-order items ordered specifically for your build.</li>
           <li>Anything that has been installed, fitted, modified or run on a vehicle.</li>
-          <li>Gift cards.</li>
         </ul>
       </Section>
 
