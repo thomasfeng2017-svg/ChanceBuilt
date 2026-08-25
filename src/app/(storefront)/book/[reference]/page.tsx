@@ -46,8 +46,7 @@ export default async function AppointmentPage({
         </span>
         <h1 className="display text-3xl">Appointment requested</h1>
         <p className="mt-3 text-sm text-muted">
-          We&apos;ve got it. You&apos;ll hear from us to confirm before your slot, usually the
-          same day.
+          We&apos;ve got it. You&apos;ll hear from us to confirm before your slot.
         </p>
         <p className="mt-2 font-mono text-sm">
           Reference <span className="font-bold">{appointment.reference}</span>

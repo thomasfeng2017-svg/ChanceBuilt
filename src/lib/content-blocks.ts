@@ -71,7 +71,7 @@ export const CONTENT_GROUPS: ContentGroup[] = [
         key: "home.tuning.body",
         label: "Tuning section paragraph",
         multiline: true,
-        text: "Unlocks, flashing platforms and custom calibration on our own dyno. We log, adjust and re-log until the car is safe and making what it should on your fuel, then we hand you a sheet that proves it.",
+        text: "Unlocks, flashing platforms and custom calibration. We log, adjust and re-log until the car is safe and making what it should on your fuel, rather than loading someone else's map and hoping.",
       },
       {
         key: "home.services.heading",

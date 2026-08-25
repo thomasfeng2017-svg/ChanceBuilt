@@ -208,7 +208,7 @@ export default async function HomePage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
-                href="/book?service=custom-dyno-tune"
+                href="/book?service=custom-tuning"
                 className="focus-ring rounded bg-accent px-7 py-3.5 text-sm font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"
               >
                 Book a tune

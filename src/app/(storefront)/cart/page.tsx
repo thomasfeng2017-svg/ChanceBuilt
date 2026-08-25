@@ -20,7 +20,7 @@ export default async function CartPage() {
         </svg>
         <h1 className="text-2xl font-extrabold tracking-tight">Your cart is empty</h1>
         <p className="mt-2 text-sm text-muted">
-          Select your vehicle and we&apos;ll show you parts guaranteed to fit it.
+          Select your vehicle and we&apos;ll only show you parts that fit it.
         </p>
         <Link
           href="/parts"
