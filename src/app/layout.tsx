@@ -32,6 +32,12 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  // Google Search Console ownership for https://www.chancebuiltperformance.com/.
+  // A public token, not a secret. Removing it un-verifies the property, so it
+  // stays even though verification only has to succeed once.
+  verification: {
+    google: "a0RzcjvFa84SFfOUr1YROzmuX-arPLV9iGuMH-hT_Wo",
+  },
 };
 
 /**
