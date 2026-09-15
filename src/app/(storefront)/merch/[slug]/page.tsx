@@ -8,6 +8,36 @@ import { PartImage } from "@/components/PartImage";
 import { productFraming } from "@/lib/product-images";
 import { AddToCart } from "@/components/AddToCart";
 
+// Cached at the edge and rebuilt at most every five minutes, or immediately
+// when the admin saves something that calls revalidatePath. Nothing on this
+// page differs between visitors, so serving it per request only cost money.
+export const revalidate = 300;
+
+
+/**
+ * Which merch pages to build ahead of time.
+ *
+ * Without this a dynamic route renders on demand and, in this version of Next,
+ * is not cached at all: the revalidate above was being ignored and every hit
+ * ran the query, which was checked with the response headers rather than
+ * assumed. Listing the slugs makes these pages static at build; a product
+ * added later still renders on its first request and is cached from then on.
+ *
+ * Tolerates the database being unreachable at build time. An empty list means
+ * "all on demand", which is the behaviour we already had, not a broken build.
+ */
+export async function generateStaticParams() {
+  try {
+    const products = await prisma.product.findMany({
+      where: { archived: false, category: { kind: "MERCH" } },
+      select: { slug: true },
+    });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
+
 async function getProduct(slug: string) {
   return prisma.product.findUnique({
     where: { slug },

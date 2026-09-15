@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSessionUser, canWrite } from "@/lib/auth";
-import { EDIT_PARAM } from "@/lib/edit-mode";
+import { EDIT_PARAM } from "@/lib/edit-mode-shared";
 
 /**
  * The "Text" tab: open a page of the site with editing switched on.

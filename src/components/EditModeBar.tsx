@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { EDIT_PARAM } from "@/lib/edit-mode-shared";
+import { useEditing } from "./EditProvider";
 
 /** Links that should drop out of editing rather than carry it along. */
 function leavesEditMode(url: URL, origin: string): boolean {
@@ -46,7 +47,9 @@ export function EditModeBar() {
   const params = useSearchParams();
   const router = useRouter();
 
-  const editing = params.get(EDIT_PARAM) === "1";
+  // From the provider, not the URL: the URL says "asked", the provider says
+  // "asked and the server agreed". An anonymous ?edit=1 gets no bar.
+  const editing = useEditing();
 
   useEffect(() => {
     if (!editing) return;
@@ -129,13 +132,24 @@ export function EditModeBar() {
           >
             All text
           </Link>
-          <Link
+          {/*
+            A plain anchor, not a Link, on purpose.
+
+            Editing is entered by a redirect to ?edit=1, which is a hard load of
+            a page that is prerendered without any query string. After that load
+            the client router's idea of "where am I" is the prerendered URL, so
+            asking it to go to the same path minus the parameter is, to it, a
+            navigation to where it already is, and it does nothing. Done sat
+            there doing nothing on the home page for exactly this reason. A
+            full navigation sidesteps the router and lands on the clean page.
+          */}
+          <a
             href={exitHref}
             data-edit-exit="1"
             className="focus-ring rounded bg-accent px-4 py-1.5 text-xs font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"
           >
             Done
-          </Link>
+          </a>
         </div>
       </div>
     </div>

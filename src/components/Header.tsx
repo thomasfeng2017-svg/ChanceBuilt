@@ -1,11 +1,9 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { getVehicle, garageBarHidden } from "@/lib/garage";
-import { getCartCount } from "@/lib/cart";
-import { getSessionCustomer } from "@/lib/customer-auth";
-import { GarageBar } from "./GarageBar";
-import { SearchBox } from "./SearchBox";
+import { SearchBox, SearchBoxFallback } from "./SearchBox";
 import { Logo } from "./Logo";
 import { SITE } from "@/lib/site";
+import { AccountLink, CartLink, LiveGarageBar } from "./HeaderChrome";
 
 const NAV = [
   { name: "Parts", href: "/parts" },
@@ -16,14 +14,16 @@ const NAV = [
   { name: "Contact", href: "/contact" },
 ];
 
-export async function Header() {
-  const [vehicle, cartCount, barHidden, customer] = await Promise.all([
-    getVehicle(),
-    getCartCount(),
-    garageBarHidden(),
-    getSessionCustomer(),
-  ]);
-
+/**
+ * Site header. Deliberately reads nothing per request.
+ *
+ * The cart badge, the account name and the garage bar are the only parts that
+ * differ between visitors, and they are filled in by HeaderChrome in the
+ * browser. Keeping cookies out of here is what lets the pages that use this
+ * layout be cached, which is what stops a bot crawl from running a database
+ * query per hit.
+ */
+export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ink/95 backdrop-blur supports-[backdrop-filter]:bg-ink/85">
       <div className="border-b border-line/60">
@@ -47,7 +47,11 @@ export async function Header() {
         </Link>
 
         <div className="hidden flex-1 lg:block">
-          <SearchBox />
+          {/* SearchBox reads the URL; on a cached page that needs a boundary
+              or the page cannot be prerendered. See SearchBoxFallback. */}
+          <Suspense fallback={<SearchBoxFallback />}>
+            <SearchBox />
+          </Suspense>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
@@ -57,45 +61,15 @@ export async function Header() {
           >
             Book service
           </Link>
-
-          {/* Signed out this reads "Sign in", which is a weaker invitation than
-              "Create an account" but the right one: someone who already has an
-              account should not have to hunt, and the register page is one
-              click from the sign-in page. */}
-          <Link
-            href={customer ? "/account" : "/account/login"}
-            className="focus-ring hidden items-center gap-2 rounded border border-line px-3.5 py-2.5 text-sm font-semibold transition-colors hover:border-line-hi sm:flex"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <span className="hidden lg:inline">
-              {customer ? customer.name.split(" ")[0] : "Sign in"}
-            </span>
-          </Link>
-
-          <Link
-            href="/cart"
-            aria-label={`Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
-            className="focus-ring flex items-center gap-2 rounded border border-line px-3.5 py-2.5 text-sm font-semibold transition-colors hover:border-line-hi"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 4h2l2.6 12.4A2 2 0 0 0 9.6 18h8.2a2 2 0 0 0 2-1.6L21.5 8H6" />
-              <circle cx="10" cy="21" r="1" />
-              <circle cx="18" cy="21" r="1" />
-            </svg>
-            {cartCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold text-accent-fg">
-                {cartCount}
-              </span>
-            )}
-          </Link>
+          <AccountLink variant="bar" />
+          <CartLink />
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 pb-3 sm:px-6 lg:hidden">
-        <SearchBox />
+        <Suspense fallback={<SearchBoxFallback />}>
+          <SearchBox />
+        </Suspense>
       </div>
 
       <nav aria-label="Main" className="border-t border-line/60">
@@ -121,17 +95,12 @@ export async function Header() {
           {/* The account button in the bar above is hidden on small screens,
               so it needs a home in the nav or a phone can't reach it at all. */}
           <li className="sm:hidden">
-            <Link
-              href={customer ? "/account" : "/account/login"}
-              className="focus-ring eyebrow block px-3 py-3 text-[0.7rem] whitespace-nowrap text-muted"
-            >
-              {customer ? "My garage" : "Sign in"}
-            </Link>
+            <AccountLink variant="nav" />
           </li>
         </ul>
       </nav>
 
-      <GarageBar vehicle={vehicle} hidden={barHidden} />
+      <LiveGarageBar />
     </header>
   );
 }

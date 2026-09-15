@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyChrome } from "@/lib/chrome-events";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setVehicleAction } from "@/app/actions";
@@ -135,6 +136,10 @@ export function YmmSelector({
       if (result && !result.ok) {
         setError(result.error);
       } else {
+        // The header reads the garage cookie in the browser now. When the
+        // selector is used on the page it redirects to, the URL does not
+        // change, so nothing else would prompt it to look again.
+        notifyChrome();
         router.refresh();
       }
     });

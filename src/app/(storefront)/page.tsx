@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { getVehicle, vehicleLabel } from "@/lib/garage";
 import { searchCatalog, getCategoryNav } from "@/lib/catalog";
 import { prisma } from "@/lib/db";
-import { YmmSelector } from "@/components/YmmSelector";
 import { ProductCard } from "@/components/ProductCard";
 import { PartImage } from "@/components/PartImage";
-import { VehicleQuickPick } from "@/components/VehicleQuickPick";
+import { HeroVehiclePanel } from "@/components/HeroVehiclePanel";
 import { HeroMedia } from "@/components/HeroMedia";
 import { SectionPhoto } from "@/components/SectionPhoto";
 import { EngineGlyph } from "@/components/EngineGlyph";
@@ -16,14 +14,20 @@ import { SITE, HOURS_LABEL } from "@/lib/site";
 import { Copy } from "@/components/Copy";
 import Image from "next/image";
 
-export default async function HomePage() {
-  const vehicle = await getVehicle();
+/*
+  Cached. The home page is the page bots fetch most, and it used to run six
+  database queries per fetch, two of them filtered by the visitor's cookie.
+  It now renders the guest view once and serves it from the edge; a returning
+  customer's chosen car is filled into the hero by HeroVehiclePanel in the
+  browser, and the filtered catalog is one click away on /parts.
+*/
+export const revalidate = 300;
 
+export default async function HomePage() {
   const [featured, departments, quickPicks, services, recentWork, merch] = await Promise.all([
-    // "In stock now" and the fitment count are about parts. Merch has its own
-    // strip further down the page.
-    searchCatalog({ vehicle, kind: "PART", sort: "relevance", page: 1 }),
-    getCategoryNav(vehicle, "PART"),
+    // "In stock now" is about parts. Merch has its own strip further down.
+    searchCatalog({ vehicle: null, kind: "PART", sort: "relevance", page: 1 }),
+    getCategoryNav(null, "PART"),
     // The chassis most likely to be on the lift.
     prisma.model.findMany({
       where: { chassis: { in: ["F80", "F82", "G80", "G82", "F87", "G20"] } },
@@ -74,49 +78,15 @@ export default async function HomePage() {
           </div>
 
           {/* ---- YMM: the entry point to the whole store ---- */}
-          <div className="mt-14 max-w-3xl rounded-card border border-line bg-surface/95 p-5 backdrop-blur sm:p-6">
-            {vehicle ? (
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="eyebrow text-[0.65rem] text-muted">Shopping for</p>
-                  <p className="display mt-1.5 text-2xl">{vehicleLabel(vehicle)}</p>
-                  <p className="mt-1 text-sm text-muted">
-                    {featured.total} part{featured.total === 1 ? "" : "s"} confirmed to fit
-                  </p>
-                </div>
-                <Link
-                  href="/parts"
-                  className="focus-ring shrink-0 rounded bg-accent px-7 py-3.5 text-center text-sm font-bold tracking-widest text-accent-fg uppercase transition-colors hover:bg-accent-hi"
-                >
-                  Browse parts
-                </Link>
-              </div>
-            ) : (
-              <>
-                <p className="eyebrow mb-3 text-[0.65rem] text-muted">
-                  Find parts that fit your car
-                </p>
-                <YmmSelector redirectTo="/parts" />
-              </>
-            )}
-          </div>
-
-          {!vehicle && quickPicks.length > 0 && (
-            <div className="mt-6 max-w-3xl">
-              <p className="mb-3 text-xs text-muted">Or jump straight to a chassis</p>
-              <div className="flex flex-wrap gap-2">
-                {quickPicks.map((m) => (
-                  <VehicleQuickPick
-                    key={m.id}
-                    year={m.yearEnd}
-                    makeId={m.makeId}
-                    modelId={m.id}
-                    label={m.chassis ? `${m.chassis} ${m.name}` : m.name}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <HeroVehiclePanel
+            quickPicks={quickPicks.map((m) => ({
+              id: m.id,
+              year: m.yearEnd,
+              makeId: m.makeId,
+              modelId: m.id,
+              label: m.chassis ? `${m.chassis} ${m.name}` : m.name,
+            }))}
+          />
         </div>
       </section>
 
@@ -267,11 +237,6 @@ export default async function HomePage() {
           <div className="mb-8 border-b border-line pb-5">
             <p className="rule-heading eyebrow text-[0.7rem] text-muted"><span className="section-index">03</span>Parts</p>
             <h2 className="display mt-2 text-2xl sm:text-3xl"><Copy k="home.departments.heading" links={false} /></h2>
-            {vehicle && (
-              <p className="mt-2 text-sm text-muted">
-                Counts are what fits your {vehicleLabel(vehicle)}
-              </p>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -302,7 +267,7 @@ export default async function HomePage() {
             <div>
               <p className="rule-heading eyebrow text-[0.7rem] text-muted"><span className="section-index">04</span>Catalog</p>
               <h2 className="display mt-2 text-2xl sm:text-3xl">
-                {vehicle ? `Fits your ${vehicle.chassis ?? vehicle.modelName}` : "In stock now"}
+                In stock now
               </h2>
             </div>
             <Link
@@ -315,7 +280,7 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {featured.products.slice(0, 8).map((p, i) => (
-              <ProductCard key={p.id} product={p} hasVehicle={!!vehicle} index={i} />
+              <ProductCard key={p.id} product={p} hasVehicle={false} index={i} />
             ))}
           </div>
         </section>

@@ -6,6 +6,12 @@ import { GalleryVideo } from "@/components/GalleryVideo";
 import { GALLERY_SLOT } from "@/lib/image-slots";
 import { Copy } from "@/components/Copy";
 
+// Cached at the edge and rebuilt at most every five minutes, or immediately
+// when the admin saves something that calls revalidatePath. Nothing on this
+// page differs between visitors, so serving it per request only cost money.
+export const revalidate = 300;
+
+
 export const metadata: Metadata = {
   title: "Gallery",
   description:

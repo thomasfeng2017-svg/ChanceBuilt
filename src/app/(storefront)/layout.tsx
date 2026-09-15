@@ -5,7 +5,8 @@ import { Logo } from "@/components/Logo";
 import { SITE, HOURS_LABEL, directionsUrl } from "@/lib/site";
 import { SubscribeForm } from "@/components/SubscribeForm";
 import { EditModeBar } from "@/components/EditModeBar";
-import { getEditContext } from "@/lib/edit-mode";
+import { EditProvider } from "@/components/EditProvider";
+import { ChromeProvider } from "@/components/HeaderChrome";
 
 /**
  * Public storefront chrome.
@@ -55,13 +56,20 @@ const jsonLd = {
   ].filter(Boolean),
 };
 
-export default async function StorefrontLayout({
+/*
+  Reads no cookies and no headers. That is what allows the pages inside it to
+  be cached at the edge, and it is the single most important cost decision in
+  the codebase: a layout that reads a cookie makes every page under it run a
+  function per request, and a bot crawl of a few million requests then costs
+  real money. The per-visitor bits live in ChromeProvider and EditProvider,
+  which do their reading in the browser after the cached page has painted.
+*/
+export default function StorefrontLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const edit = await getEditContext();
-
   return (
-    <>
+    <ChromeProvider>
+    <EditProvider>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -71,10 +79,7 @@ export default async function StorefrontLayout({
         Skip to main content
       </a>
 
-      {/* Header reads cookies, so it opts out of static rendering. */}
-      <Suspense fallback={<div className="h-40 border-b border-line bg-ink" />}>
-        <Header />
-      </Suspense>
+      <Header />
 
       <main id="main" tabIndex={-1} className="flex-1">
         {children}
@@ -228,7 +233,13 @@ export default async function StorefrontLayout({
           </p>
         </div>
       </footer>
-      {edit.editing && <EditModeBar />}
-    </>
+      {/* Its own boundary: the bar reads the URL, and a useSearchParams
+          without a nearby Suspense would push the whole page to client
+          rendering, handing crawlers an empty shell. */}
+      <Suspense fallback={null}>
+        <EditModeBar />
+      </Suspense>
+    </EditProvider>
+    </ChromeProvider>
   );
 }

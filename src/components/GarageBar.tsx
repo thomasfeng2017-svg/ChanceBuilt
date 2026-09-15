@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { clearVehicleAction, hideGarageBarAction } from "@/app/actions";
 import { YmmSelector } from "./YmmSelector";
 import { vehicleLabel, type Vehicle } from "@/lib/vehicle";
+import { notifyChrome } from "@/lib/chrome-events";
 
 /**
  * The persistent "you are shopping for X" bar.
@@ -38,6 +39,7 @@ export function GarageBar({
   const hide = () =>
     startTransition(async () => {
       await hideGarageBarAction();
+      notifyChrome();
       router.refresh();
     });
 
@@ -130,6 +132,7 @@ export function GarageBar({
             onClick={() =>
               startTransition(async () => {
                 await clearVehicleAction();
+                notifyChrome();
                 router.refresh();
               })
             }

@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyChrome } from "@/lib/chrome-events";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addToCartAction } from "@/app/actions";
@@ -36,6 +37,8 @@ export function AddToCart({
           ? `Only ${result.quantity} left, so we added that many to your cart.`
           : "Added to cart.",
       );
+      // The badge reads the cart cookie in the browser now, so tell it.
+      notifyChrome();
       router.refresh();
     });
   }

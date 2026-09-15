@@ -8,6 +8,12 @@ import { bandPadding } from "@/lib/band-height";
 import { Copy } from "@/components/Copy";
 import { SERVICE_CATEGORIES, serviceCategoryBlurbKey } from "@/lib/service-categories";
 
+// Cached at the edge and rebuilt at most every five minutes, or immediately
+// when the admin saves something that calls revalidatePath. Nothing on this
+// page differs between visitors, so serving it per request only cost money.
+export const revalidate = 300;
+
+
 export const metadata: Metadata = {
   title: "Services",
   description:

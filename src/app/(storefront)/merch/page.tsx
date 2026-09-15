@@ -8,6 +8,7 @@ import { SectionPhoto } from "@/components/SectionPhoto";
 import { bandPadding } from "@/lib/band-height";
 import { Copy } from "@/components/Copy";
 
+
 export const metadata: Metadata = {
   title: "Shop merch",
   description:
