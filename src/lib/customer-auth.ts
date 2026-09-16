@@ -25,6 +25,8 @@ import { hashPassword, verifyPassword } from "./passwords";
  */
 
 export const CUSTOMER_SESSION_COOKIE = "cb_customer";
+/** Readable companion to the session cookie. See createCustomerSession. */
+export const CUSTOMER_MARKER_COOKIE = "cb_signed_in";
 const SESSION_DAYS = 30;
 
 /** Misses allowed before an account is briefly locked. */
@@ -62,8 +64,27 @@ export async function createCustomerSession(
     data: { tokenHash: hashToken(token), customerId, expiresAt, userAgent: userAgent ?? null },
   });
 
-  (await cookies()).set(CUSTOMER_SESSION_COOKIE, token, {
+  const jar = await cookies();
+  jar.set(CUSTOMER_SESSION_COOKIE, token, {
     httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    expires: expiresAt,
+  });
+
+  /*
+    A second, readable cookie that says only "someone is signed in".
+
+    The session token above is httpOnly, as it must be, so the browser cannot
+    tell whether to bother asking the server who is signed in. Without this
+    marker every page view, including every crawler that runs JavaScript,
+    made that request and paid for a function invocation to be told "nobody".
+    The marker carries no secret: knowing a session exists gets you nothing,
+    and the server still checks the real token on every use.
+  */
+  jar.set(CUSTOMER_MARKER_COOKIE, "1", {
+    httpOnly: false,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
@@ -78,6 +99,7 @@ export async function destroyCustomerSession(): Promise<void> {
     await prisma.customerSession.deleteMany({ where: { tokenHash: hashToken(token) } });
   }
   jar.delete(CUSTOMER_SESSION_COOKIE);
+  jar.delete(CUSTOMER_MARKER_COOKIE);
 }
 
 /** The signed-in customer, or null. Safe to call from any server component. */

@@ -19,5 +19,11 @@ export async function GET(request: Request) {
     orderBy: { name: "asc" },
   });
 
-  return NextResponse.json({ makes });
+  // Public reference data that changes only on a vehicle import. Cached at
+  // the edge per year, so the picker stops costing a database query per
+  // page view for every visitor and crawler that runs JavaScript.
+  return NextResponse.json(
+    { makes },
+    { headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800" } },
+  );
 }

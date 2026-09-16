@@ -28,5 +28,10 @@ export async function GET(request: Request) {
     label: m.chassis ? `${m.name} (${m.chassis})` : m.name,
   }));
 
-  return NextResponse.json({ models });
+  // Same reasoning as the makes route: reference data, cached per make and
+  // year at the edge for a day.
+  return NextResponse.json(
+    { models },
+    { headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800" } },
+  );
 }

@@ -111,25 +111,30 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
   }, [jar]);
 
   // The session cookie is httpOnly, so who is signed in has to come from the
-  // server. One request per page view, none for anything that does not run
-  // JavaScript. Re-asked on navigation, since signing in and out both redirect.
-  const [customerName, setCustomerName] = useState<string | null>(null);
+  // server. But whether anyone is signed in is readable, via a marker cookie
+  // set alongside the session, so the question is only asked when there is
+  // someone to ask about. Anonymous visitors, and crawlers that run
+  // JavaScript, make no request here at all. Re-asked on navigation, since
+  // signing in and out both redirect.
+  const signedIn = jar !== null && cookieValue(jar, "cb_signed_in") === "1";
+  const [fetchedName, setFetchedName] = useState<string | null>(null);
   useEffect(() => {
+    if (!signedIn) return;
     let off = false;
     fetch("/api/chrome", { cache: "no-store", credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d: { customerName: string | null } | null) => {
-        if (!off && d) setCustomerName(d.customerName);
+        if (!off && d) setFetchedName(d.customerName);
       })
       .catch(() => {});
     return () => {
       off = true;
     };
-  }, [pathname]);
+  }, [pathname, signedIn]);
 
   const value = useMemo<Chrome>(
-    () => ({ ...EMPTY, ...fromCookies, customerName }),
-    [fromCookies, customerName],
+    () => ({ ...EMPTY, ...fromCookies, customerName: signedIn ? fetchedName : null }),
+    [fromCookies, signedIn, fetchedName],
   );
 
   return <ChromeContext.Provider value={value}>{children}</ChromeContext.Provider>;
